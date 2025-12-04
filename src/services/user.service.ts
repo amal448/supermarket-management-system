@@ -1,0 +1,63 @@
+// src/services/user.service.ts
+
+import type { User } from "@/lib/types/user";
+import axios from "axios";
+
+const API_URL = "http://localhost:5000/api";
+export type Manager = {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+  isActive: boolean;
+  branchId: string;
+};
+export const UserService = {
+  // Get all MANAGERS
+  getManagers: async (): Promise<User[]> => {
+    const res = await axios.get(`${API_URL}/user/get-all-manager`, {
+      withCredentials: true,
+    });
+    return res.data;
+  },
+  // OPTIONAL: get all users (if needed later)
+  getAll: async (): Promise<User[]> => {
+    const res = await axios.get(`${API_URL}/user/getalluser`, {
+      withCredentials: true,
+    });
+
+    return res.data;
+  },
+  addUser: async (data: any, role: string): Promise<User[]> => {
+    const endpoint =
+      role === "admin" ? "/auth/register" : "/user/create-user";
+
+    const res = await axios.post(`${API_URL}${endpoint}`, data, {
+      withCredentials: true,
+    });
+
+    return res.data;
+  },
+  editUser: async (data: any,): Promise<Manager[]> => {
+    const endpoint = '/user/update-user'
+
+
+    const res = await axios.post(`${API_URL}${endpoint}`, data, {
+      withCredentials: true,
+    });
+
+    return res.data;
+  },
+  deleteUser: async (id: any,): Promise<User[]> => {
+    const endpoint = '/user/delete-user'
+
+
+    const res = await axios.post(`${API_URL}${endpoint}`, { id }, {
+      withCredentials: true,
+    });
+
+    return res.data;
+  },
+
+};
