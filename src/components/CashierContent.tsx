@@ -23,7 +23,7 @@ interface CartItem extends BranchProduct {
 export default function CashierContent() {
 
   const socket = useSocket();
-  const { getbranchproductStock, page, setPage,search,setSearch } = useBranchStock()
+  const { getbranchproductStock, page, setPage, search, setSearch } = useBranchStock()
   const { checkDiscountMutation } = useDiscount()
   const { PaymentMutation } = useSales()
 
@@ -150,7 +150,9 @@ export default function CashierContent() {
 
     socket.on("stock-updated", handler);
 
-    return () => socket.off("stock-updated", handler);
+    return () => {
+      socket.off("stock-updated", handler);
+    }
   }, [socket, getbranchproductStock]);
 
 
@@ -171,7 +173,7 @@ export default function CashierContent() {
               }}
             />
 
-            <Button onClick={()=>setSearch("")} className="w-full sm:w-auto">Clear</Button>
+            <Button onClick={() => setSearch("")} className="w-full sm:w-auto">Clear</Button>
           </div>
 
           <Card className="flex flex-col h-full">

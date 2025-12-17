@@ -73,7 +73,7 @@ const MessageNotification: React.FC = () => {
             message: text,
             createdAt: new Date().toISOString(),
         };
-        if (user.role === "manager") {
+        if (user?.role === "manager") {
             console.log("emitted admin send message");
 
             socket.emit("manager-send-message", messageObj);

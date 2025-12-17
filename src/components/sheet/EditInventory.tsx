@@ -43,7 +43,6 @@ export function EditInventory({
     setOpen: (val: boolean) => void;
     data: Product | null;
 }) {
-    console.log("datadata", data);
 
     const { editProductMutation } = useInventory();
 

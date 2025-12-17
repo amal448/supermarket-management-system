@@ -1,4 +1,4 @@
-import { ChartBar } from '@/components/chart/BarChart';
+// import { ChartBar } from '@/components/chart/BarChart';
 import { DatePicker } from '@/components/DatePicker';
 import { SalesLineChart } from '@/components/SalesLineChart';
 import { BranchSalesAnalysisColumns } from '@/components/tanstacktable/BranchSaleAnalysisColumn';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useSalesAnalyse } from '@/hooks/useSalesAnalyse';
 import { useSocket } from '@/hooks/useSocket';
 import type { Period } from '@/lib/types/saleanalyse';
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 
 const BranchCorePage = () => {
@@ -28,7 +28,7 @@ const BranchCorePage = () => {
 
     const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth);
     const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth);
-    const [period, setPeriod] = useState<Period>("daily");
+    // const [period, setPeriod] = useState<Period>("daily");
 
     const [filters, setFilters] = useState({
         startDate: toLocalDateString(startOfMonth),
@@ -60,7 +60,9 @@ const BranchCorePage = () => {
             console.log("🔥 Analytics updated via socket", update.data);
         });
 
-        return () => socket.off("analytics_update");
+        return () =>{
+            socket.off("analytics_update");
+        } 
     }, [socket]);
 
 
@@ -125,7 +127,7 @@ const BranchCorePage = () => {
                             const start = startDate ? toLocalDateString(startDate) : filters.startDate;
                             const end = endDate ? toLocalDateString(endDate) : filters.endDate;
 
-                            setFilters({ startDate: start, endDate: end, period });
+                            setFilters({ startDate: start, endDate: end, period:"daily" });
                             refetch();
                         }}
                     >

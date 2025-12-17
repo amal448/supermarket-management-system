@@ -12,13 +12,9 @@ export const ProductSchema = z.object({
 
   brand: z.string().min(1, "Brand is required"),
 
-  costPrice: z
-    .number({ coerce: true }) // coerce converts string -> number automatically
-    .min(1, "Cost price must be greater than 0"),
+   costPrice: z.coerce.number().min(1, "Cost price must be greater than 0"),
 
-  sellingPrice: z
-    .number({ coerce: true }) // coerce converts string -> number automatically
-    .min(1, "Selling price must be greater than 0"),
+  sellingPrice: z.coerce.number().min(1, "Selling price must be greater than 0"),
 });
 
 export type ProductInput = z.infer<typeof ProductSchema>;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { BranchProduct, Product } from "@/lib/types/product";
+import type {  Product } from "@/lib/types/product";
 import type { RestockRequestPayload } from "@/lib/types/restock";
 
 type GetBranchStockParams = {

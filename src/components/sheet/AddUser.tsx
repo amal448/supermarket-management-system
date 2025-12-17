@@ -17,7 +17,7 @@ export function AddUser() {
     throw new Error("Unauthorized role");
   }
 
-  const roleOptions = getRoleOptions(user?.role as string);
+  const roleOptions = getRoleOptions(user?.role as UserSchemaType["role"]);
 
   const fields: SheetField[] = [
     { name: "username", label: "User Name", required: true },
@@ -48,21 +48,22 @@ export function AddUser() {
         username: "",
         email: "",
         password: "",
-        role: roleOptions.length > 0 ? roleOptions[0].value : "",
+       role: roleOptions.length > 0 ? roleOptions[0].value : "manager"
       }}
     />
   );
 }
 
-function getRoleOptions(currentRole: string) {
+function getRoleOptions(currentRole: UserSchemaType["role"]) {
   if (currentRole === "admin") {
-    return [{ value: "manager", label: "Manager" }];
+    return [{ value: "manager" as const, label: "Manager" }];
   }
   if (currentRole === "manager") {
     return [
-      { value: "cashier", label: "Cashier" },
-      { value: "staff", label: "Staff" },
+      { value: "cashier" as const, label: "Cashier" },
+      { value: "staff" as const, label: "Staff" },
     ];
   }
   return [];
 }
+

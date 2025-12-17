@@ -1,69 +1,38 @@
+import { useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
+import { useStockRequestItems } from "@/hooks/useAdminStockRequests";
+import { StockInventoryService } from "@/services/stock.service";
 import ViewItems from "@/components/tanstacktable/page";
 import { stockRequestItemColumns } from "@/components/tanstacktable/requestItemColumns";
-import type { RestockRequestItem } from "@/lib/types/restock";
-import { useState } from "react";
-import { StockInventoryService } from "@/services/stock.service";
-import { Button } from "@/components/ui/button";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useStockRequestItems } from "@/hooks/useAdminStockRequests";
 import Pagination from "@/components/ui/Pagination";
+import { Button } from "@/components/ui/button";
+import type { RestockRequestItem } from "@/lib/types/restock";
 
 export default function ViewStockDetail() {
-  const { state } = useLocation();
-  const requestId = state?.request?._id;  // <-- Use the _id
-
-
-  const { data: request, isLoading, isError, refetch } = useStockRequestItems(requestId);
-
+  const { id: requestId } = useParams<{ id: string }>();
+  
+  // Always call hooks at the top level
+  const { data: request, isLoading, isError, refetch } = useStockRequestItems(requestId || "");
   const [selectedItems, setSelectedItems] = useState<Map<string, number>>(new Map());
+  const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
-  const [page, setPage] = useState(1);
-
+  // Handle no requestId
   if (!requestId) return <div>No request selected</div>;
   if (isLoading) return <div>Loading...</div>;
-  if (isError || !request) return <div>Error loading request</div>;
+  if (isError) return <div>Error loading request</div>;
+  if (!request) return <div>Request not found</div>;
 
-  const totalItems = request.items.length;
+  // Pagination
+  const totalItems = request.items?.length || 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
-  const paginatedItems = request.items.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
+  const paginatedItems = useMemo<RestockRequestItem[]>(() => {
+    return request.items?.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE) || [];
+  }, [request.items, page]);
 
-
-  // ✅ Approve selected items
-  const handleApproveSelected = async () => {
-    for (const [requestItemId, qty] of selectedItems.entries()) {
-      const item = request.items.find((i: RestockRequestItem) => i.requestItemId === requestItemId);
-      if (!item) continue;
-
-      await StockInventoryService.approveItem(item.requestId, requestItemId, qty);
-    }
-    alert("Approved selected items!");
-    setSelectedItems(new Map());
-    refetch(); // 🔄 Refetch request items from backend
-  };
-
-  // ✅ Reject selected items
-  const handleRejectSelected = async () => {
-    for (const requestItemId of selectedItems.keys()) {
-      const item = request.items.find((i: RestockRequestItem) => i.requestItemId === requestItemId);
-      if (!item) continue;
-
-      await StockInventoryService.rejectItem(item.requestId, requestItemId);
-    }
-    alert("Rejected selected items!");
-    setSelectedItems(new Map());
-    refetch(); // 🔄 Refetch request items from backend
-  };
-
-
-
-  // ✅ Select/unselect item
+  /** ---------------- Select / Unselect Item ---------------- */
   const handleSelectProduct = (item: RestockRequestItem) => {
-    if (!item.requestItemId) return;
     setSelectedItems((prev) => {
       const copy = new Map(prev);
       if (copy.has(item.requestItemId)) copy.delete(item.requestItemId);
@@ -72,9 +41,8 @@ export default function ViewStockDetail() {
     });
   };
 
-  // ✅ Handle quantity change for selected items
+  /** ---------------- Quantity Change ---------------- */
   const handleItemQuantityChange = (requestItemId: string, qty: number) => {
-    if (!requestItemId) return;
     setSelectedItems((prev) => {
       const copy = new Map(prev);
       copy.set(requestItemId, qty);
@@ -82,12 +50,33 @@ export default function ViewStockDetail() {
     });
   };
 
+  /** ---------------- Approve Selected ---------------- */
+  const handleApproveSelected = async () => {
+    for (const [requestItemId, qty] of selectedItems.entries()) {
+      await StockInventoryService.approveItem(requestItemId, qty);
+    }
+    alert("Approved selected items!");
+    setSelectedItems(new Map());
+    refetch();
+  };
+
+  /** ---------------- Reject Selected ---------------- */
+  const handleRejectSelected = async () => {
+    for (const requestItemId of selectedItems.keys()) {
+      await StockInventoryService.rejectItem(requestItemId);
+    }
+    alert("Rejected selected items!");
+    setSelectedItems(new Map());
+    refetch();
+  };
+
   return (
     <div>
-      <h2 className="scroll-m-20  pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-        Branch: {request?.branch?.name} |{request?.branch?.location}
+      <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight">
+        Branch: {request.branch?.name || "N/A"}
       </h2>
 
+      {/* Items Table */}
       <ViewItems
         items={paginatedItems}
         columns={stockRequestItemColumns({
@@ -96,8 +85,10 @@ export default function ViewStockDetail() {
           handleItemQuantityChange,
         })}
       />
+
+      {/* Approve / Reject Buttons */}
       <div className="flex justify-end gap-3 my-4 mx-5">
-        <Button 
+        <Button
           disabled={selectedItems.size === 0}
           className="bg-green-400"
           onClick={handleApproveSelected}
@@ -105,7 +96,7 @@ export default function ViewStockDetail() {
           Approve Selected
         </Button>
 
-        <Button 
+        <Button
           disabled={selectedItems.size === 0}
           variant="destructive"
           onClick={handleRejectSelected}
@@ -113,11 +104,11 @@ export default function ViewStockDetail() {
           Reject Selected
         </Button>
       </div>
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={(p) => setPage(p)}
-      />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+      )}
     </div>
   );
 }

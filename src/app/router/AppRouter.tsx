@@ -60,7 +60,7 @@ export default function AppRouter() {
             <Route path="managers" element={<Managers />} />
             <Route path="products" element={<Inventory />} />
             <Route path="discount" element={<Discount />} />
-            <Route path="stock-request-detail" element={<ViewStockDetail />} />
+            <Route path="stock-request-detail/:id" element={<ViewStockDetail />} />
           </Route>
         </Route>
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { InventoryService } from "@/services/inventory.service";
-import type { Product, PaginatedProducts } from "@/lib/types/product";
+import type {  PaginatedProducts } from "@/lib/types/product";
 import { useState } from "react";
 
 export function useInventory() {

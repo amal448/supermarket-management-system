@@ -1,59 +1,63 @@
-import axios from "axios";
-import type { RestockRequest } from "@/lib/types/restock";
+import axios, { type AxiosResponse } from "axios";
+import type { RestockRequest, RestockRequestItem } from "@/lib/types/restock";
 
-const STOCK_URL = "http://localhost:5003/api/stock"
+type ApiResponse<T> = {
+  data: T;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+const STOCK_URL = "http://localhost:5003/api/stock";
 
 export const StockInventoryService = {
-  // GET ALL products
-  listallStockRequest: async (): Promise<RestockRequest[]> => {
-    const res = await axios.get(`${STOCK_URL}/stock-requests`, {
+  /** GET ALL stock requests (with pagination) */
+  listallStockRequest(): Promise<AxiosResponse<ApiResponse<RestockRequest[]>>> {
+    return axios.get<ApiResponse<RestockRequest[]>>(`${STOCK_URL}/stock-requests`, {
       withCredentials: true,
     });
-    return res.data;
-  },
-  listallStockRequestItemsById: async (requestId:string) => {
-    const res = await axios.get(`${STOCK_URL}/stock-requests-items/${requestId}`, {
-      withCredentials: true,
-    });
-    
-    return res;
-  },
-  // Approve single item
-   approveItem: async (requestId: string, requestItemId: string, qty: number)  => {
-    
-    const res = await axios.put(
-      `${STOCK_URL}/item/${requestItemId}/approve`,
-      { approvedQty: qty },
-      { withCredentials: true }
-    );
-    return res.data;
   },
 
-  // Reject single item
-  rejectItem: async (requestId: string, requestItemId: string) => {
-    const res = await axios.put(
-      `${STOCK_URL}/item/${requestItemId}/reject`,
-      {},
-      { withCredentials: true }
-    );
-    return res.data;
+  /** GET single stock request by ID */
+  listallStockRequestItemsById(requestId: string): Promise<RestockRequest> {
+    return axios
+      .get<RestockRequest>(`${STOCK_URL}/stock-requests-items/${requestId}`, {
+        withCredentials: true,
+      })
+      .then((res) => res.data);
   },
 
-  // Approve ALL
-  approveAll: async (requestId: string, items: any[]) => {
-    const res = await axios.put(
-      `${STOCK_URL}/approve-all`,
-      { requestId, items },
-      { withCredentials: true }
-    );
-    return res.data;
+  /** Approve a single item */
+  approveItem(requestItemId: string, qty: number): Promise<RestockRequest> {
+    return axios
+      .put<RestockRequest>(
+        `${STOCK_URL}/item/${requestItemId}/approve`,
+        { approvedQty: qty },
+        { withCredentials: true }
+      )
+      .then((res) => res.data);
   },
 
-  // CREATE new product
-  //   create: async (data: RestockRequestPayload ): Promise<Product> => {
-  //     const res = await axios.post(`${STOCK_URL}/`, data, {
-  //       withCredentials: true,
-  //     });
-  //     return res.data;
-  //   },
+  /** Reject a single item */
+  rejectItem(requestItemId: string): Promise<RestockRequest> {
+    return axios
+      .put<RestockRequest>(`${STOCK_URL}/item/${requestItemId}/reject`, {}, {
+        withCredentials: true,
+      })
+      .then((res) => res.data);
+  },
+
+  /** Approve ALL items in a request */
+  approveAll(requestId: string, items: RestockRequestItem[]): Promise<RestockRequest> {
+    return axios
+      .put<RestockRequest>(
+        `${STOCK_URL}/approve-all`,
+        { requestId, items },
+        { withCredentials: true }
+      )
+      .then((res) => res.data);
+  },
 };

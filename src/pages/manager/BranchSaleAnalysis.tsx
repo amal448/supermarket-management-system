@@ -9,7 +9,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 
 const BranchSaleAnalysis = () => {
     const {user}=useAuth()
-    const branchId=user?.branchId
+    const branchId = user?.branchId ?? undefined;
 
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SalesService } from "@/services/sales.service";
-import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
+// import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
 import { useAuth } from "@/app/providers/AuthProvider";
 
 export function useSales(saleId?: string) {

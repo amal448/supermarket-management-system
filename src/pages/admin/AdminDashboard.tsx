@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { ChartBar } from "@/components/chart/BarChart";
 import DashBoardCard from "@/components/DashBoardCard";
@@ -7,7 +7,7 @@ import { useSales } from "@/hooks/useSales";
 const AdminDashboard = () => {
   const socket = useSocket();
   const { getSummarySales, queryClient } = useSales();
-  const { data: dashboard, isPending } = getSummarySales;
+  const { data: dashboard } = getSummarySales;
 
 
   // 🔥 Listen for Kafka → Socket → UI updates

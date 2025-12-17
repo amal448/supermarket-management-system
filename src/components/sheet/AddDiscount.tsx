@@ -9,7 +9,7 @@ export function AddDiscount() {
     const { productsQuery } = useInventory();
 
     const [selectedType, setSelectedType] = useState<string>("");
-    const products = productsQuery.data?.data ?? [];
+    const products = productsQuery.data?.items ?? [];
     const productOptions = products.map((p:any) => ({
         value: p._id!,
         label: p.name,

@@ -9,6 +9,7 @@ import { Send } from "lucide-react";
 import { useSocket } from "@/hooks/useSocket";
 import { useAuth } from "@/app/providers/AuthProvider";
 import Pagination from "@/components/ui/Pagination";
+import type {  RestockRequestPayload } from "@/lib/types/restock";
 
 const Stock = () => {
   const socket = useSocket();
@@ -48,13 +49,15 @@ const Stock = () => {
     };
 
     socket.on("stock-updated", handler);
-    return () => socket.off("stock-updated", handler);
+    return () => {
+      socket.off("stock-updated", handler);
+    }
   }, [socket, getbranchproductStock]);
 
   /** ---------------- UI STATE ---------------- */
   const [filter, setFilter] = useState<"all" | "in" | "out" | "requested">("all");
   const [selectedItems, setSelectedItems] = useState<Map<string, number>>(new Map());
-  const [notes, setNotes] = useState("");
+  // const [notes, setNotes] = useState("");
 
   /** ---------------- FILTERS ---------------- */
   const filteredData = useMemo(() => {
@@ -65,17 +68,18 @@ const Stock = () => {
   }, [products, filter]);
 
   /** ---------------- ACTIONS ---------------- */
-  const handleSubmitRequest = () => {
-    const items = Array.from(selectedItems.entries()).map(
-      ([productId, quantity]) => ({
-        productId,
-        quantity,
-      })
-    );
-
-    addBranchMutation.mutate({ items, notes });
-    
+const handleSubmitRequest = () => {
+  const payload: RestockRequestPayload = {
+    items: Array.from(selectedItems.entries()).map(([productId, quantity]) => ({
+      productId: productId!, // ! ensures TypeScript knows it's not undefined
+      requestedQty: quantity,
+      status: "PENDING",
+    })),
   };
+
+  addBranchMutation.mutate(payload);
+  setSelectedItems(new Map());
+};;
 
   const handleSelectProduct = (prod: BranchProduct) => {
     const updated = new Map(selectedItems);
@@ -137,7 +141,7 @@ const Stock = () => {
       {/* Request Box */}
       {selectedItems.size > 0 && (
         <div className=" flex justify-end p-6 mt-6">
-         
+
           <Button onClick={handleSubmitRequest} className="bg-green-400">
             <Send className="w-4 h-4 mr-2" /> Submit Request
           </Button>

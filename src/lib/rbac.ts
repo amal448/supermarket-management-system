@@ -1,20 +1,20 @@
-import type { Role } from './types/roles';
+import type { Roles } from './types/roles';
 
-export const RBAC: Record<Role, any> = {
-  ADMIN: {
+export const RBAC: Record<Roles, any> = {
+  admin: {
     canManageBranches: true,
     canManageManagers: true,
     dashboard: 'ADMIN',
   },
-  MANAGER: {
+  manager: {
     canManageBranches: false,
     canManageManagers: false,
     dashboard: 'MANAGER',
   },
-  CASHIER: {
+  cashier: {
     dashboard: 'COMMON'
   },
-  STAFF: {
+  staff: {
     dashboard: 'COMMON'
   }
 };

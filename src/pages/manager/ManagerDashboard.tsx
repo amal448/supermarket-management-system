@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { ChartBar } from "@/components/chart/BarChart";
 import DashBoardCard from "@/components/DashBoardCard";

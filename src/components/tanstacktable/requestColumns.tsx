@@ -21,7 +21,7 @@ export const requestColumns: ColumnDef<RequestRow>[] = [
     header: "Branch",
     cell: ({ row }) => {
       // row.original is of type RequestRow
-      return <span>{row.original.branchName || "-"}</span>;
+      return <span>{row?.original?.branchName || "-"}</span>;
     },
   },
   {
@@ -49,10 +49,9 @@ export const requestColumns: ColumnDef<RequestRow>[] = [
         <span
           className="cursor-pointer text-blue-500"
           onClick={() =>
-            
-            navigate("/admin/stock-request-detail", {
-              state: { request: req },
-            })
+
+            navigate(`/admin/stock-request-detail/${req._id}`)
+
           }
         >
           View Items

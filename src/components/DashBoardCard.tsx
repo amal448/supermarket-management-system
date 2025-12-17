@@ -11,9 +11,9 @@ type Props = {
 const DashBoardCard = ({
   todaysRevenue,
   monthlyTotal,
-  yearlyTotal,
+  // yearlyTotal,
   todaysPurchase,
-  todaysTransactions,
+  // todaysTransactions,
 }: Props) => {
   
   return (

@@ -1,5 +1,5 @@
 // File: src/pages/PaymentSuccess.jsx
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
 export default function PaymentSuccess() {

@@ -20,8 +20,8 @@ const MessageBroadCast = () => {
 
 
     const { data: chatHistory } = useChatHistory(
-        user?.id ?? null,
-      selectedUser?._id ?? "broadcast"
+        user?.id,
+        selectedUser?._id ?? "broadcast"
     );
 
     const { managersQuery } = useManagerMutation();
@@ -80,27 +80,31 @@ const MessageBroadCast = () => {
         socket.on("receive-message", (msg) => {
             console.log("CLIENT RECEIVED:", msg);
         });
-     const handler = (msg: any) => {
-    if (!selectedUser) return;
+        const handler = (msg: any) => {
+            if (!selectedUser) return;
 
-    // ⭐ Broadcast case
-    if (selectedUser._id === null && msg.type === "broadcast") {
-        setMessages(prev => [...prev, msg]);
-        return;
-    }
+            // ⭐ Broadcast case
+            if (selectedUser._id === null && msg.type === "broadcast") {
+                setMessages(prev => [...prev, msg]);
+                return;
+            }
 
-    // ⭐ Normal chat case
-    if (
-        (msg.senderId === selectedUser._id && msg.receiverId === user?.id) ||
-        (msg.senderId === user?.id && msg.receiverId === selectedUser._id)
-    ) {
-        setMessages(prev => [...prev, msg]);
-    }
-};
+            // ⭐ Normal chat case
+            if (
+                (msg.senderId === selectedUser._id && msg.receiverId === user?.id) ||
+                (msg.senderId === user?.id && msg.receiverId === selectedUser._id)
+            ) {
+                setMessages(prev => [...prev, msg]);
+            }
+        };
 
 
         socket.on("receive-message", handler);
-        return () => socket.off("receive-message", handler);
+        return () =>{
+            socket.off("receive-message", handler);
+        }
+
+
     }, [socket, selectedUser, user]);
 
     return (
@@ -151,7 +155,7 @@ const MessageBroadCast = () => {
                 <div className="flex-1 flex flex-col">
 
                     {!selectedUser ? (
-                         <div className="relative flex flex-1 items-center justify-center">
+                        <div className="relative flex flex-1 items-center justify-center">
 
                             {/* Background image */}
                             <img

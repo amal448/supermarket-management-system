@@ -5,7 +5,7 @@ import Pagination from '@/components/ui/Pagination';
 import { useInventory } from "@/hooks/useInventory";
 
 const ViewInventory = () => {
-  const { productsQuery, page, setPage, search, setSearch } = useInventory();
+  const { productsQuery, page, setPage} = useInventory();
   const { user } = useAuth();
   if (!user) return <p>Something Wrong ! Please LogIn Again...</p>;
   if (productsQuery.isLoading) return <p>Loading products...</p>;

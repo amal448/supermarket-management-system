@@ -1,71 +1,58 @@
-import type { BranchProduct } from "./product";
+export interface Product {
+  _id: string;
+  name: string;
+  sku: string;
+  category: string;
+  unit: string;
+  brand: string;
+  costPrice: number;
+  sellingPrice: number;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
 
 export interface RestockRequestItem {
-  _id?: string;
-  productId: string;
-  requestedQty: number;
-  approvedQty?: number;
-  status: string;
-  requestId: string;
   requestItemId: string;
-  product?: any; // optional, for embedded product details
-}
-
-export interface RestockRequest {
-  _id: string;
-  branchId: string;
-  branchName: string;
-  requestedBy: string;
-  status: string;
-  createdAt: string;
-  notes?: string;
-  items: RestockRequestItem[];
-  manager?: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-}
-
-
-export interface RestockRequestPayload {
-  items: RestockRequestItem[];
-  notes?: string;
-}
-export interface RestockRequest {
-  _id: string;
-  branchId: string;
-  branchName: string;
-  requestedBy: string;
-  status: string;
-  createdAt: string;
-  notes?: string;
-  items: RestockRequestItem[];
-  manager?: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-}
-
-export interface RestockRequestCreateItem {
-  productId: string;
+  productId?: string;
   requestedQty: number;
+  approvedQty: number;
+  status: string;
+  product: Product;
 }
 
-export interface RestockRequestCreatePayload {
-  items: RestockRequestCreateItem[];
-  notes?: string;
+export interface Branch {
+  _id: string;
+  name: string;
+  location?: string;
+  managerId?: string;
 }
 
-export type PaginatedBranchStock = {
-  data: BranchProduct[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+export interface Manager {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export interface RestockRequest {
+  _id: string;
+  requestedBy: string;
+  status: string;
+  createdAt: string;
+  branch?: Branch;      // for single request
+  branchId?: string;    // for list endpoint
+  branchName?: string;  // for list endpoint
+  items: RestockRequestItem[];
+  manager?: Manager;
+}
+
+// src/lib/types/restock.ts
+export type RestockRequestPayload = {
+  items: {
+    productId: string;
+    requestedQty: number;
+    status?: string;
+  }[];
 };

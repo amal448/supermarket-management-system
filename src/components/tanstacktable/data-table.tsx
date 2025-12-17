@@ -8,7 +8,7 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
+  // TableFooter,
   TableHead,
   TableHeader,
   TableRow,
