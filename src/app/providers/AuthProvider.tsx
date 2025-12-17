@@ -10,7 +10,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
   loading: boolean;
-  initialized :boolean
+  initialized: boolean
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,13 +24,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /** Axios interceptor to attach access token */
   useEffect(() => {
-    
+
     const requestInterceptor = axios.interceptors.request.use((config) => {
-      if (accessToken && config.headers) {
-        config.headers["Authorization"] = `Bearer ${accessToken}`;
+      if (
+        accessToken &&
+        config.headers &&
+        !config.url?.includes("/auth/login") &&
+        !config.url?.includes("/auth/refresh")
+      ) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;
     });
+
 
     const responseInterceptor = axios.interceptors.response.use(
       (res) => res,
@@ -70,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccessToken(null);
       } finally {
         setLoading(false);
-         setInitialized(true); // now the app knows auth check is done
+        setInitialized(true); // now the app knows auth check is done
       }
     };
     initializeAuth();
@@ -81,8 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const res = await AuthService.login({ email, password });
-      console.log("auth login",res);
-      
+      console.log("auth login", res);
+
       setUser(res.user);
       setAccessToken(res.accessToken);
       return res.user;
@@ -105,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await AuthService.refreshToken(); // cookie-based refresh
       setAccessToken(res.accessToken);
-      console.log("auth refreshAccessToken",res);
+      console.log("auth refreshAccessToken", res);
 
       setUser(res.user);
     } catch (err) {
@@ -119,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user,initialized , accessToken, login, logout, refreshAccessToken, loading }}
+      value={{ user, initialized, accessToken, login, logout, refreshAccessToken, loading }}
     >
       {children}
     </AuthContext.Provider>
