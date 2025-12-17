@@ -5,25 +5,36 @@ import { useState } from "react";
 import { StockInventoryService } from "@/services/stock.service";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import { useStockRequestItems } from "@/hooks/useAdminStockRequests";
+import Pagination from "@/components/ui/Pagination";
 
 export default function ViewStockDetail() {
-  const queryClient = useQueryClient();
- const { state } = useLocation();
-const requestId = state?.request?._id;  // <-- Use the _id
+  const { state } = useLocation();
+  const requestId = state?.request?._id;  // <-- Use the _id
 
 
   const { data: request, isLoading, isError, refetch } = useStockRequestItems(requestId);
 
   const [selectedItems, setSelectedItems] = useState<Map<string, number>>(new Map());
+  const ITEMS_PER_PAGE = 5;
+
+  const [page, setPage] = useState(1);
 
   if (!requestId) return <div>No request selected</div>;
   if (isLoading) return <div>Loading...</div>;
   if (isError || !request) return <div>Error loading request</div>;
 
+  const totalItems = request.items.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  const paginatedItems = request.items.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
+
+
   // ✅ Approve selected items
-  const handleApproveItem = async () => {
+  const handleApproveSelected = async () => {
     for (const [requestItemId, qty] of selectedItems.entries()) {
       const item = request.items.find((i: RestockRequestItem) => i.requestItemId === requestItemId);
       if (!item) continue;
@@ -36,7 +47,7 @@ const requestId = state?.request?._id;  // <-- Use the _id
   };
 
   // ✅ Reject selected items
-  const handleRejectItem = async () => {
+  const handleRejectSelected = async () => {
     for (const requestItemId of selectedItems.keys()) {
       const item = request.items.find((i: RestockRequestItem) => i.requestItemId === requestItemId);
       if (!item) continue;
@@ -48,13 +59,7 @@ const requestId = state?.request?._id;  // <-- Use the _id
     refetch(); // 🔄 Refetch request items from backend
   };
 
-  // ✅ Approve entire request
-  const handleApproveAll = async () => {
-    await StockInventoryService.approveAll(request._id, request.items);
-    alert("Entire request approved!");
-    queryClient.invalidateQueries({ queryKey: ["admin-stock-requests"] });
-    refetch(); // 🔄 Refetch items
-  };
+
 
   // ✅ Select/unselect item
   const handleSelectProduct = (item: RestockRequestItem) => {
@@ -79,24 +84,40 @@ const requestId = state?.request?._id;  // <-- Use the _id
 
   return (
     <div>
-      <h2>Branch: {request.branchName}</h2>
+      <h2 className="scroll-m-20  pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+        Branch: {request?.branch?.name} |{request?.branch?.location}
+      </h2>
 
       <ViewItems
-        items={request.items}
+        items={paginatedItems}
         columns={stockRequestItemColumns({
           selectedItems,
           handleSelectProduct,
           handleItemQuantityChange,
-          handleApproveItem,
-          handleRejectItem,
         })}
       />
+      <div className="flex justify-end gap-3 my-4 mx-5">
+        <Button 
+          disabled={selectedItems.size === 0}
+          className="bg-green-400"
+          onClick={handleApproveSelected}
+        >
+          Approve Selected
+        </Button>
 
-      <div className="flex justify-end gap-2 my-4 mx-5 ">
-        <Button disabled={request.status!='ACCEPTED'} className="bg-green-600" onClick={handleApproveAll}>
-          Approve Entire Request
+        <Button 
+          disabled={selectedItems.size === 0}
+          variant="destructive"
+          onClick={handleRejectSelected}
+        >
+          Reject Selected
         </Button>
       </div>
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={(p) => setPage(p)}
+      />
     </div>
   );
 }

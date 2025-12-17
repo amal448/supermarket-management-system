@@ -1,34 +1,36 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SalesService } from "@/services/sales.service";
 import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export function useSales(saleId?: string) {
-
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  // ✅ Daily sales for dashboard
+  const isDashboardAllowed =
+    user?.role === "admin" || user?.role === "manager";
+
+  // ✅ Run ONLY for admin / manager
   const getSummarySales = useQuery({
     queryKey: ["sales-summary"],
     queryFn: () => SalesService.getSalesSummary(),
-    refetchInterval: 1000 * 60 * 5, // 5 minutes
+    enabled: isDashboardAllowed,   // 🔥 THIS FIX
+    refetchInterval: 1000 * 60 * 5,
   });
 
-  // ✅ All sales list
   const salesQuery = useQuery({
     queryKey: ["sales"],
     queryFn: () => SalesService.getMySales(),
     enabled: !saleId,
   });
 
-  // ✅ Sales Details by ID
   const salesQueryDetails = useQuery({
     queryKey: ["sale", saleId],
     queryFn: () => SalesService.getMoreSalesDetails(saleId!),
     enabled: !!saleId,
   });
 
-  // ❗ Payment mutation
-  const PaymentMutation = useMutation<PaymentResponse, Error, CreatePaymentDTO>({
+  const PaymentMutation = useMutation({
     mutationFn: SalesService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
@@ -40,6 +42,7 @@ export function useSales(saleId?: string) {
     getSummarySales,
     salesQuery,
     salesQueryDetails,
-    PaymentMutation
+    PaymentMutation,
+    queryClient,
   };
 }

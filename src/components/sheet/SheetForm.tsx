@@ -1,4 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useForm, Controller, type FieldValues } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { ZodSchema } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,16 +25,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// TYPES
 export type SheetField = {
   name: string;
   label: string;
-  defaultValue?: string;
+  defaultValue?: any;
   type?: "text" | "number" | "email" | "password" | "select" | "date";
   required?: boolean;
   options?: { value: string; label: string }[];
 };
 
-export type SheetFormProps<T = Record<string, any>> = {
+export type SheetFormProps<T extends FieldValues> = {
   title: string;
   description?: string;
   fields: SheetField[];
@@ -38,12 +43,20 @@ export type SheetFormProps<T = Record<string, any>> = {
   triggerLabel?: string;
   open?: boolean;
   setOpen?: (val: boolean) => void;
-  defaultValues?: T;
-  onFieldChange?: (name: string, value: string) => void;
+  defaultValues?: Partial<T>;
+  schema?: ZodSchema<any>;
+  onFieldChange?: (name: string, value: any) => void;
+  /** Called after parent async mutation succeeds  */
+  onSuccess?: () => void;
 
+  /** Only reset when fields change (dynamic forms) */
+  resetOnFieldsChange?: boolean;
 };
 
-export function SheetForm<T = Record<string, any>>({
+// --------------------------
+// COMPONENT
+// --------------------------
+export function SheetForm<T extends FieldValues = FieldValues>({
   title,
   description,
   fields,
@@ -52,8 +65,9 @@ export function SheetForm<T = Record<string, any>>({
   open: controlledOpen,
   setOpen: setControlledOpen,
   defaultValues,
+  schema,
+  resetOnFieldsChange,
   onFieldChange,
-
 }: SheetFormProps<T>) {
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
 
@@ -61,37 +75,55 @@ export function SheetForm<T = Record<string, any>>({
   const finalOpen = isControlled ? controlledOpen : open;
   const finalSetOpen = isControlled ? setControlledOpen : setOpen;
 
-  const initialFormData: Record<string, any> = fields.reduce(
-    (acc, f) => ({ ...acc, [f.name]: f.defaultValue ?? "" }),
-    {}
-  );
+  // --------------------------
+  // React Hook Form
+  // --------------------------
+  const form = useForm<T>({
+    resolver: schema ? (zodResolver(schema as any) as any) : undefined,
+    defaultValues: defaultValues as any,
+  });
 
-  const [formData, setFormData] = React.useState<Record<string, any>>(initialFormData);
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = form;
 
-  // Update formData when defaultValues change (for edit)
-  useEffect(() => {
-    if (defaultValues) {
-      setFormData({ ...initialFormData, ...defaultValues });
+  // --------------------------
+  // Reset form when sheet closes
+  // --------------------------
+  React.useEffect(() => {
+    if (!finalOpen) {
+      reset(defaultValues as any);
     }
-  }, [defaultValues]);
+  }, [finalOpen, reset, defaultValues]);
 
-  const handleChange = (name: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // Reset when fields change (for dynamic forms like AddDiscount)
+  React.useEffect(() => {
+    if (resetOnFieldsChange) {
+      const values: any = {};
+      fields.forEach((f) => {
+        values[f.name] = defaultValues?.[f.name] ?? "";
+      });
+      reset(values);
+    }
+  }, [fields, defaultValues, reset, resetOnFieldsChange]);
 
-  const getFieldValue = (name: string) => formData[name] ?? "";
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData as T);
-    finalSetOpen(false);
+  // --------------------------
+  // Submit (parent async runs mutation)
+  // --------------------------
+  const submitForm = (data: T) => {
+    onSubmit(data);
   };
 
   return (
     <Sheet open={finalOpen} onOpenChange={finalSetOpen}>
-      {!isControlled && triggerLabel && (
+      {triggerLabel && (
         <SheetTrigger asChild>
-          <Button variant="outline">{triggerLabel}</Button>
+          <Button variant="outline" onClick={() => finalSetOpen(true)}>
+            {triggerLabel}
+          </Button>
         </SheetTrigger>
       )}
 
@@ -101,48 +133,73 @@ export function SheetForm<T = Record<string, any>>({
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
 
-        <div className="space-y-4 mt-4 overflow-y-auto pr-2">
-          <form className="grid gap-6 px-4" onSubmit={handleSubmit}>
+        <div className="flex-1 overflow-y-auto pr-2">
+          <form
+            id="sheet-form"
+            onSubmit={handleSubmit(submitForm)}
+            className="space-y-6 mt-4 px-2"
+          >
             {fields.map((field) => (
               <div key={field.name} className="grid gap-2">
                 <Label htmlFor={field.name}>{field.label}</Label>
 
-                {field.type === "select" && field.options ? (
-                  <Select
-                    value={getFieldValue(field.name)}
-                    onValueChange={(val) => {
-                      handleChange(field.name, val);
-                      onFieldChange?.(field.name, val); // notify parent
-                    }}
-                  >
+                <Controller
+                  control={control}
+                  name={field.name as any}
+                  render={({ field: rhfField }) => {
+                    // Select
+                    if (field.type === "select" && field.options) {
+                      return (
+                        <Select
+                          value={rhfField.value ?? ""}
+                          onValueChange={(val) => {
+                            rhfField.onChange(val);
+                            onFieldChange?.(field.name, val);
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={`Select ${field.label}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {field.options.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      );
+                    }
 
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={`Select ${field.label}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {field.options.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id={field.name}
-                    type={field.type ?? "text"}
-                    value={getFieldValue(field.name)}
-                    required={field.required}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                  />
+                    // Input
+                    return (
+                      <Input
+                        {...rhfField}
+                        type={field.type ?? "text"}
+                        value={rhfField.value ?? ""}
+                        onChange={(e) => {
+                          rhfField.onChange(e);
+                          onFieldChange?.(field.name, e.target.value);
+                        }}
+                      />
+                    );
+                  }}
+                />
+
+                {errors[field.name as keyof T] && (
+                  <p className="text-red-500 text-sm">
+                    {(errors[field.name as keyof T] as any)?.message}
+                  </p>
                 )}
               </div>
             ))}
 
-            <SheetFooter className="mt-4 flex justify-end gap-2">
-              <Button type="submit">Save</Button>
+            <SheetFooter className="border-t pt-4 mt-2 bg-white">
+              <Button type="submit" form="sheet-form">
+                Save
+              </Button>
             </SheetFooter>
           </form>
         </div>

@@ -1,17 +1,19 @@
 import { SheetForm, type SheetField } from "./SheetForm";
 import { useBranches } from "@/hooks/useBranches";
 import { useManagerMutation } from "@/hooks/useManager";
+import type { AddBranchInput } from "@/lib/validation/addBranchValidation";
+import { addBranchSchema } from "@/lib/validation/addBranchValidation";
 
 export function AddBranch() {
   const { managersQuery } = useManagerMutation()
-  const {addBranchMutation}=useBranches();
+  const { addBranchMutation } = useBranches();
 
-  
-const managerOptions =
-  managersQuery.data?.map((m) => ({
-    value: m._id ?? "",   // 🔥 ensures always string
-    label: m.username,
-  })) ?? [];
+
+  const managerOptions =
+    managersQuery.data?.map((m) => ({
+      value: m._id ?? "",   // 🔥 ensures always string
+      label: m.username,
+    })) ?? [];
 
 
   const branchFields: SheetField[] = [
@@ -32,12 +34,18 @@ const managerOptions =
   };
 
   return (
-    <SheetForm
+    <SheetForm<AddBranchInput>
       title="Add Branch"
       description="Fill in the branch details"
       fields={branchFields}
       onSubmit={handleAddBranch}
       triggerLabel="Add Branch"
+      schema={addBranchSchema}
+      defaultValues={{
+        name: "",
+        location: "",
+        managerId:"",
+      }}
     />
   );
 }

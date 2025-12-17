@@ -8,6 +8,7 @@ const adminItems = [
   { title: "Product Management", url: "products" },
   { title: "All Branches", url: "branches" },
   { title: "Managers", url: "managers" },
+  { title: "Chat", url: "conversation" },
   { title: "Discount Management", url: "discount" },
 ];
 

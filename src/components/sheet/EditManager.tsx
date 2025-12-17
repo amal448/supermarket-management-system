@@ -11,6 +11,7 @@ import {
     SheetTitle,
 } from "../ui/sheet";
 import { useManagerMutation } from "@/hooks/useManager";
+import { useBranches } from "@/hooks/useBranches";
 
 
 export type Manager = {
@@ -40,7 +41,9 @@ export function EditManager({
     data: any | null;   // receives manager row from table (likely contains _id)
 }) {
     const { updateUserMutation } = useManagerMutation();
-
+    const { branchesQuery } = useBranches();
+    console.log("branchesQuery",branchesQuery.data);
+    
     const [formData, setFormData] = React.useState<Manager>({
         id: "",
         username: "",

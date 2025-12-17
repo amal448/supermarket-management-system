@@ -1,19 +1,23 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { RestockRequestItem } from "@/lib/types/restock";
-import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
+export const statusBadgeMap: Record<string, string> = {
+  PENDING: "bg-yellow-500 text-white",
+  ACCEPTED: "bg-blue-500 text-white",
+  APPROVED: "bg-green-600 text-white",
+  REJECTED: "bg-red-600 text-white",
+};
 export function stockRequestItemColumns({
   selectedItems,
   handleSelectProduct,
   handleItemQuantityChange,
-  handleApproveItem,
-  handleRejectItem
+
 }: {
   selectedItems: Map<string, number>;
   handleSelectProduct: (item: RestockRequestItem) => void;
   handleItemQuantityChange: (requestItemId: string, qty: number) => void;
-  handleApproveItem: (item: RestockRequestItem) => void;
-  handleRejectItem: (item: RestockRequestItem) => void;
+
 }): ColumnDef<RestockRequestItem>[] {
   return [
     {
@@ -71,36 +75,49 @@ export function stockRequestItemColumns({
       },
     },
     {
-      id: "actions",
-      header: "Actions",
+      accessorKey: "status",
+      header: "Status",
       cell: ({ row }) => {
-        const item = row.original;
-        const disabled = item.status === "APPROVED" || item.status === "REJECTED";
+        const status = row.getValue("status") as string;
 
         return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              className={disabled ? "bg-gray-400 text-gray-200 cursor-not-allowed" : "bg-green-500 text-white"}
-              onClick={() => handleApproveItem(item)}
-            >
-              Approve
-            </Button>
-
-            <Button
-              variant="destructive"
-              size="sm"
-              disabled={disabled}
-              className={disabled ? "bg-gray-400 text-gray-200 cursor-not-allowed" : ""}
-              onClick={() => handleRejectItem(item)}
-            >
-              Reject
-            </Button>
-          </div>
+          <Badge className={statusBadgeMap[status] ?? "bg-gray-400 text-white"}>
+            {status}
+          </Badge>
         );
       },
-    },
+    }
+    // {
+    //   id: "actions",
+    //   header: "Actions",
+    //   cell: ({ row }) => {
+    //     const item = row.original;
+    //     const disabled = item.status === "APPROVED" || item.status === "REJECTED";
+
+    //     return (
+    //       <div className="flex items-center gap-2">
+    //         <Button
+    //           variant="outline"
+    //           size="sm"
+    //           disabled={disabled}
+    //           className={disabled ? "bg-gray-400 text-gray-200 cursor-not-allowed" : "bg-green-500 text-white"}
+    //           onClick={() => handleApproveItem(item)}
+    //         >
+    //           Approve
+    //         </Button>
+
+    //         <Button
+    //           variant="destructive"
+    //           size="sm"
+    //           disabled={disabled}
+    //           className={disabled ? "bg-gray-400 text-gray-200 cursor-not-allowed" : ""}
+    //           onClick={() => handleRejectItem(item)}
+    //         >
+    //           Reject
+    //         </Button>
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
 }

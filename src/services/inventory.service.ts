@@ -1,12 +1,12 @@
 import axios from "axios";
-import type { Product } from "@/lib/types/product";
+import type { PaginatedProducts, Product } from "@/lib/types/product";
 
 const API_URL = "http://localhost:5003/api/inventory";
 
 export const InventoryService = {
   // GET ALL products
-  getAll: async (): Promise<Product[]> => {
-    const res = await axios.get(`${API_URL}`, {
+  getAll: async (page = 1, limit = 10, search = ""): Promise<PaginatedProducts> => {
+    const res = await axios.get(`${API_URL}?page=${page}&limit=${limit}&search=${search}`, {
       withCredentials: true,
     });
     return res.data;

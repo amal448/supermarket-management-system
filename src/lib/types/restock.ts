@@ -1,3 +1,5 @@
+import type { BranchProduct } from "./product";
+
 export interface RestockRequestItem {
   _id?: string;
   productId: string;
@@ -57,3 +59,13 @@ export interface RestockRequestCreatePayload {
   items: RestockRequestCreateItem[];
   notes?: string;
 }
+
+export type PaginatedBranchStock = {
+  data: BranchProduct[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+};

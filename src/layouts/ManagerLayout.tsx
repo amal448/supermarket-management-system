@@ -6,10 +6,12 @@ import { Bell } from "lucide-react";
 import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function ManagerLayout() {
-    const {  logout } = useAuth();
-  
+  const { logout, user } = useAuth();
+  console.log("usermananana", user?.id!);
+
+
   return (
-     <SidebarProvider>
+    <SidebarProvider>
       <ManagerSidebar />
       <main className="w-full">
         <nav className="w-full bg-gray-100 py-2 px-4 ">

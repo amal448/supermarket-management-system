@@ -9,12 +9,11 @@ export function AddDiscount() {
     const { productsQuery } = useInventory();
 
     const [selectedType, setSelectedType] = useState<string>("");
-
-    const productOptions =
-        productsQuery.data?.map((p) => ({
-            value: p._id!,
-            label: p.name,
-        })) ?? [];
+    const products = productsQuery.data?.data ?? [];
+    const productOptions = products.map((p:any) => ({
+        value: p._id!,
+        label: p.name,
+    }));
 
     // 🎯 Rebuild fields dynamically
     const baseFields: SheetField[] = [
@@ -87,10 +86,11 @@ export function AddDiscount() {
             fields={discountFields}
             onSubmit={handleAddDiscount}
             triggerLabel="Add Discount"
-            // ⭐ Capture field changes (especially type)
+            resetOnFieldsChange={true} // Only here we reset
             onFieldChange={(name, value) => {
                 if (name === "type") setSelectedType(value);
             }}
         />
+
     );
 }

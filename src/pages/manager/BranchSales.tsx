@@ -27,8 +27,8 @@ const BranchSales = () => {
 
     return (
         <div className="h-full">
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex items-center justify-between mb-4">
+                <div className='flex flex-col gap-2'>
                     <h1 className="text-3xl font-bold text-foreground">Latest Transactions</h1>
                     <p className="text-muted-foreground">For More Clarification Connect your Branch  Manager</p>
                 </div>

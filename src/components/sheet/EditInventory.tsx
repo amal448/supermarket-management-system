@@ -1,6 +1,7 @@
 import type { Product } from "@/lib/types/product";
 import { SheetForm, type SheetField } from "./SheetForm";
 import { useInventory } from "@/hooks/useInventory";
+import { ProductSchema, type ProductInput } from "@/lib/validation/addProductValidation";
 
 const productFields: SheetField[] = [
     { name: "name", label: "Product Name", required: true },
@@ -42,20 +43,42 @@ export function EditInventory({
     setOpen: (val: boolean) => void;
     data: Product | null;
 }) {
+    console.log("datadata", data);
+
     const { editProductMutation } = useInventory();
 
-    const handleEditProduct = (values: Record<string, any>) => {
-        editProductMutation.mutate(values as Product); // 🎯 FIXED
-        setOpen(false);
-    };
-
+    // const handleEditProduct = (values: Record<string, any>) => {
+    //     editProductMutation.mutate(values as Product); // 🎯 FIXED
+    //     setOpen(false);
+    // };
+    // Clean data for the form (strings for number inputs)
+    const cleanedData: Partial<ProductInput> | undefined = data
+        ? {
+            name: data.name,
+            category: data.category as ProductInput["category"],
+            unit: data.unit as ProductInput["unit"],
+            brand: data.brand ?? "",
+            costPrice: data.costPrice ?? 0,
+            sellingPrice: data.sellingPrice ?? 0,
+        }
+        : undefined;
     return (
-        <SheetForm
+        <SheetForm<ProductInput >
             title="Edit Product"
             description="Update product details"
             fields={productFields}
-            onSubmit={handleEditProduct}
-            defaultValues={data || undefined}
+            onSubmit={(values) => {
+                // Convert numbers back for backend
+                editProductMutation.mutate({
+                    ...values,
+                    costPrice: Number(values.costPrice),
+                    sellingPrice: Number(values.sellingPrice),
+                    _id: data?._id, // ensure _id is sent
+                });
+                setOpen(false);
+            }}
+            schema={ProductSchema}
+            defaultValues={cleanedData}
             open={open}
             setOpen={setOpen}
         />

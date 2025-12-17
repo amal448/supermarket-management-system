@@ -22,6 +22,10 @@ import PaymentCancel from "@/pages/PaymentCancel";
 import HistoryPage from "@/pages/common/HistoryPage";
 import BranchSales from "@/pages/manager/BranchSales";
 import TransactionDetails from "@/pages/manager/TransactionDetails";
+import BranchSaleAnalysis from "@/pages/manager/BranchSaleAnalysis";
+import MessageBroadCast from "@/pages/admin/MessageBroadCast";
+import MessageNotification from "@/pages/manager/MessageNotification";
+import BranchCorePage from "@/pages/admin/BranchCorePage";
 
 export default function AppRouter() {
   return (
@@ -32,7 +36,7 @@ export default function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
-        {/* Admin */}
+        {/* Cashier */}
         <Route element={<ProtectedRoute allowedRoles={['cashier']} />}>
           <Route path="/" element={<BaseLayout />}>
             <Route index element={<Navigate to="sales" replace />} />
@@ -48,8 +52,11 @@ export default function AppRouter() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="conversation" element={<MessageBroadCast />} />
+
             <Route path="view-stocks" element={<ViewStockRequest />} />
             <Route path="branches" element={<Branches />} />
+            <Route path="branch-details/:id" element={<BranchCorePage />} />
             <Route path="managers" element={<Managers />} />
             <Route path="products" element={<Inventory />} />
             <Route path="discount" element={<Discount />} />
@@ -67,6 +74,8 @@ export default function AppRouter() {
             <Route path="staff-management" element={<StaffManagement />} />
             <Route path="branch-sales" element={<BranchSales />} />
             <Route path="transactions/:id" element={<TransactionDetails/>} />
+            <Route path="sale-analysis" element={<BranchSaleAnalysis/>} />
+            <Route path="conversation" element={<MessageNotification />} />
             
           </Route>
         </Route>

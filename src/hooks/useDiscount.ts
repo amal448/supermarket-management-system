@@ -12,6 +12,7 @@ export function useDiscount() {
         queryFn: DiscountService.getAllDiscountOffers,
     });
 
+    
     //   ADD new product
     const checkDiscountMutation = useMutation({
         mutationFn: DiscountService.applydiscount,

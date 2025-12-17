@@ -6,10 +6,10 @@ type ViewItemsProps = {
   columns: any[];
 };  
 
-export default function ViewItems({ items, columns }: ViewItemsProps) {
+export default function ViewItems({ items =[], columns=[] }: ViewItemsProps) {
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="">
       <DataTable columns={columns} data={items} />
     </div>
   );

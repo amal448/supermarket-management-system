@@ -81,6 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const res = await AuthService.login({ email, password });
+      console.log("auth login",res);
+      
       setUser(res.user);
       setAccessToken(res.accessToken);
       return res.user;
@@ -103,6 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await AuthService.refreshToken(); // cookie-based refresh
       setAccessToken(res.accessToken);
+      console.log("auth refreshAccessToken",res);
+
       setUser(res.user);
     } catch (err) {
       setUser(null);

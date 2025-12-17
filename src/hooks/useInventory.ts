@@ -1,30 +1,34 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { InventoryService } from "@/services/inventory.service";
-import type { Product } from "@/lib/types/product";
+import type { Product, PaginatedProducts } from "@/lib/types/product";
+import { useState } from "react";
 
 export function useInventory() {
-    
   const queryClient = useQueryClient();
 
-  // GET all products
-  const productsQuery = useQuery<Product[]>({
-    queryKey: ["products"],
-    queryFn: InventoryService.getAll,
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const productsQuery = useQuery<PaginatedProducts>({
+    queryKey: ["products", page, search],
+    queryFn: () => InventoryService.getAll(page, 10, search),
+    placeholderData: keepPreviousData,
   });
 
-  // ADD new product
   const addProductMutation = useMutation({
     mutationFn: InventoryService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
+
   const editProductMutation = useMutation({
     mutationFn: InventoryService.update,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
+
   const deleteProductMutation = useMutation({
     mutationFn: InventoryService.delete,
     onSuccess: () => {
@@ -36,6 +40,10 @@ export function useInventory() {
     productsQuery,
     addProductMutation,
     editProductMutation,
-    deleteProductMutation
+    deleteProductMutation,
+    page,
+    setPage,
+    search,
+    setSearch
   };
 }

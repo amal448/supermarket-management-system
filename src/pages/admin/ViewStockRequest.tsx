@@ -4,7 +4,6 @@ import { requestColumns } from '@/components/tanstacktable/requestColumns';
 import { useAdminStockRequests } from '@/hooks/useAdminStockRequests';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CalendarComponent } from '@/components/CalenderComponent';
 
 const ViewStockRequest = () => {
   const { data = [], isLoading, isError } = useAdminStockRequests();
@@ -17,7 +16,8 @@ const ViewStockRequest = () => {
    * Filtered Data
    --------------------------------*/
   const filteredData = useMemo(() => {
-    let filtered = data;
+    let filtered = data?.data;
+    console.log("filtereddd", filtered);
 
     if (filter !== 'all') {
       filtered = filtered.filter((req) => {
@@ -44,14 +44,13 @@ const ViewStockRequest = () => {
   if (isError) return <p>Error loading data</p>;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between">
-        <div className='w-full'>
+    <div className="">
+      <div className="flex items-center justify-between mb-4">
+        <div className='flex flex-col gap-2'>
           <h1 className="text-3xl font-bold text-foreground ">Stock Management</h1>
           <p className="text-muted-foreground">Manage your stock requests</p>
         </div>
-         <div className='max-w-52 w-full flex justify-end'>
-          <CalendarComponent/>
+        <div className='max-w-52 w-full flex justify-end'>
         </div>
       </div>
 
@@ -85,7 +84,7 @@ const ViewStockRequest = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-       
+
 
       {/* Table */}
       <ViewItems items={filteredData ?? []} columns={requestColumns} />

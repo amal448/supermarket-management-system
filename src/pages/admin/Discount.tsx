@@ -27,7 +27,7 @@ const Discount = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <div>
+                <div className='flex flex-col gap-2'>
                     <h1 className="text-3xl font-bold text-foreground">Discount Management</h1>
                     <p className="text-muted-foreground">Manage your Discount Offers</p>
                 </div>

@@ -1,6 +1,5 @@
 import axios from "axios";
-import type { BranchProduct, Product } from "@/lib/types/product";
-import type { RestockRequest, RestockRequestPayload } from "@/lib/types/restock";
+import type { RestockRequest } from "@/lib/types/restock";
 
 const STOCK_URL = "http://localhost:5003/api/stock"
 

@@ -1,7 +1,7 @@
 export interface Product {
   _id?: string
   name: string;
-  sku: string;
+  sku?: string;
   category: string;
   unit: string;         // kg, g, pcs
   brand?: string;
@@ -25,4 +25,18 @@ export interface BranchProduct {
   inBranch: boolean;
   isOutOfStock: boolean;
   requestedQty: boolean
+
+}
+export interface StockCheckResult {
+  stockQty: number;
+  isOut: boolean;
+}
+export interface CartItem extends BranchProduct {
+  qty: number;
+}
+export interface PaginatedProducts {
+  items: Product[];
+  total: number;
+  page: number;
+  limit: number;
 }

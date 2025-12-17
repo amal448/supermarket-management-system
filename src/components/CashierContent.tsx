@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,9 @@ import { PaymentModal } from "./PaymentModal";
 import { useDiscount } from "@/hooks/useDiscount";
 import type { DiscountResponse } from "@/lib/types/discount";
 import { useSales } from "@/hooks/useSales";
+import { useSocket } from "@/hooks/useSocket";
+import { useNavigate } from "react-router-dom";
+import Pagination from "./ui/Pagination";
 
 interface CartItem extends BranchProduct {
   qty: number;
@@ -18,25 +21,40 @@ interface CartItem extends BranchProduct {
 
 
 export default function CashierContent() {
-  const { getbranchproductStock } = useBranchStock()
+
+  const socket = useSocket();
+  const { getbranchproductStock, page, setPage,search,setSearch } = useBranchStock()
   const { checkDiscountMutation } = useDiscount()
   const { PaymentMutation } = useSales()
 
+  const products: BranchProduct[] =
+    getbranchproductStock.data?.data ?? [];
+  const pagination =
+    getbranchproductStock.data?.pagination;
+
+  const totalPages = pagination?.totalPages ?? 1;
+  const branchId = products[0]?.branchId;
+
+  const navigate = useNavigate()
   const [discountResult, setDiscountResult] = useState<DiscountResponse | null>(null);
-
   const [paymentOpen, setPaymentOpen] = useState(false);
-
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // ------------------
-  // CART HANDLERS
-  // ------------------
-
+  const getStock = (id: string) => {
+    return products.find((p) => p._id === id)?.stock ?? 0;
+  };
   const handleAddToCart = (product: BranchProduct) => {
+    const stock = product.stock;
+
     setCartItems((prev) => {
       const existing = prev.find((p) => p._id === product._id);
 
       if (existing) {
+        if (existing.qty + 1 > stock) {
+          alert(`Only ${stock} items available`);
+          return prev;
+        }
+
         return prev.map((item) =>
           item._id === product._id
             ? { ...item, qty: item.qty + 1 }
@@ -44,17 +62,33 @@ export default function CashierContent() {
         );
       }
 
+      if (stock < 1) {
+        alert("Out of stock");
+        return prev;
+      }
+
       return [...prev, { ...product, qty: 1 }];
     });
   };
 
+
   const increaseQty = (id: string) => {
+    const stock = getStock(id);
+
     setCartItems((prev) =>
-      prev.map((item) =>
-        item._id === id ? { ...item, qty: item.qty + 1 } : item
-      )
+      prev.map((item) => {
+        if (item._id === id) {
+          if (item.qty + 1 > stock) {
+            alert(`You cannot exceed stock. Available: ${stock}`);
+            return item;
+          }
+          return { ...item, qty: item.qty + 1 };
+        }
+        return item;
+      })
     );
   };
+
 
   const decreaseQty = (id: string) => {
     setCartItems((prev) =>
@@ -90,9 +124,6 @@ export default function CashierContent() {
     );
   };
 
-  // ------------------
-  // TOTALS
-  // ------------------
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.qty * item.sellingPrice,
@@ -101,9 +132,27 @@ export default function CashierContent() {
 
   const total = subtotal; // Add discount later if needed
 
-  // ------------------
-  // UI
-  // ------------------
+  useEffect(() => {
+    if (!socket || !socket.connected || !branchId) return;
+
+    console.log("📡 Cashier joining branch room:", branchId);
+    socket.emit("join-branch", branchId);
+
+  }, [socket?.connected, branchId]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handler = () => {
+      console.log("🔥 CASHIER RECEIVED LIVE STOCK UPDATE");
+      getbranchproductStock.refetch();
+    };
+
+    socket.on("stock-updated", handler);
+
+    return () => socket.off("stock-updated", handler);
+  }, [socket, getbranchproductStock]);
+
 
   return (
     <div className="bg-slate-100 p-4 sm:p-6 min-h-screen">
@@ -113,20 +162,28 @@ export default function CashierContent() {
         {/* LEFT — PRODUCT CATALOG */}
         <div className="lg:col-span-8 flex flex-col h-full">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
-            <Input placeholder="Search product name or SKU..." className="flex-1" />
-            <Button className="w-full sm:w-auto">Clear</Button>
+            <Input
+              placeholder="Search product name or SKU..."
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+            />
+
+            <Button onClick={()=>setSearch("")} className="w-full sm:w-auto">Clear</Button>
           </div>
 
           <Card className="flex flex-col h-full">
-            <CardHeader>
+            {/* <CardHeader>
               <CardTitle>Products</CardTitle>
-            </CardHeader>
+            </CardHeader> */}
 
             <CardContent>
               <ScrollArea className="flex-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
 
-                  {getbranchproductStock.data?.map((product: BranchProduct) => (
+                  {getbranchproductStock.data?.data?.map((product: BranchProduct) => (
                     <div
                       key={product._id}
                       className="p-3 border rounded bg-white flex flex-col justify-between shadow-sm"
@@ -137,6 +194,11 @@ export default function CashierContent() {
                           {product.sku} • {product.category}
                         </div>
                       </div>
+                      <div className="flex w-full justify-between py-4">
+                        <p className="text-green-400 font-bold">Stock Remaining:</p>
+                        <p className="text-red-400">{product.stock} Items</p>
+
+                      </div>
 
                       <div className="mt-3 flex items-center justify-between">
                         <div className="font-semibold">₹{product.sellingPrice}</div>
@@ -145,9 +207,15 @@ export default function CashierContent() {
                         </Button>
                       </div>
                     </div>
+
                   ))}
 
                 </div>
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={(p) => setPage(p)}
+                />
               </ScrollArea>
             </CardContent>
           </Card>
@@ -267,7 +335,7 @@ export default function CashierContent() {
                   window.location.href = res.url;   // redirect to Stripe
                   return;
                 }
-
+                navigate("/payment-success");
                 setPaymentOpen(false);
                 setCartItems([]);
               }

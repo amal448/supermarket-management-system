@@ -1,12 +1,12 @@
 import { AppSidebar } from "./AppSidebar";
-import { commonItems } from "./CommonItems";
 
 const managerItems = [
   { title: "Dashboard", url: "dashboard" },
+  { title: "Sale Analysis", url: "sale-analysis" },
+  { title: "Chat/Notification", url: "conversation" },
   { title: "Product Catalog", url: "products" },
   { title: "Stock Management", url: "stocks" },
   { title: "Staff Management", url: "staff-management" },
-  ...commonItems,
   { title: "Sales Reports", url: "branch-sales" },
 ];
 

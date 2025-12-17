@@ -1,15 +1,31 @@
 import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
+import type { Period } from "@/lib/types/saleanalyse";
 import type { SaleEntity } from "@/lib/types/sales";
 import axios from "axios";
 
 const API_URL = "http://localhost:5004/api/sales";
+// sales.service.ts
 
 export const SalesService = {
     //Manager DashBoard
     async getSalesSummary() {
-        const res = await axios.get(`${API_URL}/sales-summary`,{withCredentials:true});
+        const res = await axios.get(`${API_URL}/sales-summary`, { withCredentials: true });
         return res.data; // [{ date, cash, card }]
     },
+    async getSalesAnalysis(
+        branchId?: string,
+        startDate?: string,
+        endDate?: string,
+        period?: Period
+    ) {
+        const res = await axios.get(`${API_URL}/analytics`, {
+            params: { branchId, startDate, endDate, period },
+            withCredentials: true,
+        });
+        return res.data;
+    },
+
+
     // GET ALL products
     getMySales: async (): Promise<SaleEntity> => {
         const res = await axios.get(`${API_URL}/`, {

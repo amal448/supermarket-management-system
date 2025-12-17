@@ -1,18 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { BranchProduct } from "@/lib/types/product";
+import { useState } from "react";
 import { BranchInventoryService } from "@/services/branchInventory.service";
+import type { PaginatedBranchStock } from "@/lib/types/restock";
+
 
 export function useBranchStock() {
-    
   const queryClient = useQueryClient();
 
-  // GET all products
-const getbranchproductStock = useQuery<BranchProduct[]>({
-  queryKey: ["branchStock"],
-  queryFn: BranchInventoryService.getBranchStock,
-});
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [search, setSearch] = useState("");
 
-  // ADD new product
+  const getbranchproductStock = useQuery<PaginatedBranchStock>({
+    queryKey: ["branchStock", page, search],
+    queryFn: () =>
+      BranchInventoryService.getBranchStock({
+        page,
+        limit,
+        search,
+      }),
+    placeholderData: (prev) => prev,
+  });
+
   const addBranchMutation = useMutation({
     mutationFn: BranchInventoryService.create,
     onSuccess: () => {
@@ -23,5 +32,9 @@ const getbranchproductStock = useQuery<BranchProduct[]>({
   return {
     getbranchproductStock,
     addBranchMutation,
+    page,
+    setPage,
+    search,
+    setSearch,
   };
 }
