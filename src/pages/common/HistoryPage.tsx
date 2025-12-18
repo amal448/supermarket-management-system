@@ -1,10 +1,11 @@
 import { CashierColumns } from '@/components/tanstacktable/cashierColumns';
 import ViewItems from '@/components/tanstacktable/page';
+import Pagination from '@/components/ui/Pagination';
 import { useSales } from '@/hooks/useSales';
 import type { SaleEntity } from '@/lib/types/sales';
 
 const HistoryPage = () => {
-    const { salesQuery } = useSales();
+    const { salesQuery, page, setPage } = useSales();
     console.log("salesQuery", salesQuery);
 
     if (salesQuery.isLoading) return <p>Loading products...</p>;
@@ -16,12 +17,9 @@ const HistoryPage = () => {
 
         return <p className="text-red-500">{errMsg}</p>;
     }
-    const items: SaleEntity[] = Array.isArray(salesQuery.data)
-        ? salesQuery.data
-        : salesQuery.data
-            ? [salesQuery.data]   // wrap single sale
-            : [];
-
+   // Extract sales data and pagination info
+  const items: SaleEntity[] = salesQuery.data?.data || [];
+  const totalPages: number = salesQuery.data?.totalPages || 1;
 
     return (
         <div className="h-full">
@@ -33,6 +31,11 @@ const HistoryPage = () => {
             </div>
 
             <ViewItems items={items} columns={CashierColumns()} />
+            <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+            />
         </div>
     );
 };

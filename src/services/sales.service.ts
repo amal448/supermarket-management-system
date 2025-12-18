@@ -1,15 +1,23 @@
 import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
 import type { Period } from "@/lib/types/saleanalyse";
-import type { SaleEntity } from "@/lib/types/sales";
+import type { PaginatedSales, SaleEntity } from "@/lib/types/sales";
 import axios from "axios";
-
+type GetSaleHistory = {
+  page: number;
+  limit: number;
+  search: string;
+};
 const API_URL = "http://localhost:5004/api/sales";
 // sales.service.ts
 
 export const SalesService = {
     //Manager DashBoard
-    async getSalesSummary() {
-        const res = await axios.get(`${API_URL}/sales-summary`, { withCredentials: true });
+    async getSalesSummary({
+        page,
+        limit,
+        search,
+    }:GetSaleHistory) {
+        const res = await axios.get(`${API_URL}/sales-summary?page=${page}&limit=${limit}&search=${search}`, { withCredentials: true });
         return res.data; // [{ date, cash, card }]
     },
     async getSalesAnalysis(
@@ -27,7 +35,7 @@ export const SalesService = {
 
 
     // GET ALL products
-    getMySales: async (): Promise<SaleEntity> => {
+    getMySales: async (): Promise<PaginatedSales> => {
         const res = await axios.get(`${API_URL}/`, {
             withCredentials: true,
         });
