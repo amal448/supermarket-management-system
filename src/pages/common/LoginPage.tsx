@@ -53,7 +53,7 @@ const mutation = useMutation({
   const handleSubmit = (data: LoginFormData) => mutation.mutate(data);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-secondary to-accent/10 p-4">
+    <div className="flex min-h-screen items-center justify-center from-background via-secondary to-accent/10 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500">

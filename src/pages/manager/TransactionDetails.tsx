@@ -30,9 +30,9 @@ const TransactionDetails = () => {
     return (
         <div className="h-full">
             <div className="flex items-center justify-between">
-                <div>
+                   <div className='flex flex-col gap-2 pb-4'>
                     <h1 className="text-3xl font-bold text-foreground">Latest Transactions</h1>
-                    <p className="text-muted-foreground">For More Clarification Connect your Branch  Manager</p>
+                    <p className="text-muted-foreground">Verify the transaction</p>
                 </div>
             </div>
 

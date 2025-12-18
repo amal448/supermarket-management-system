@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useStockRequestItems } from "@/hooks/useAdminStockRequests";
 import { StockInventoryService } from "@/services/stock.service";
 import ViewItems from "@/components/tanstacktable/page";
@@ -10,26 +10,30 @@ import type { RestockRequestItem } from "@/lib/types/restock";
 
 export default function ViewStockDetail() {
   const { id: requestId } = useParams<{ id: string }>();
-  
+  const navigate = useNavigate()
   // Always call hooks at the top level
-  const { data: request, isLoading, isError, refetch } = useStockRequestItems(requestId || "");
+
+  const { data: request, isLoading, isError, refetch } = useStockRequestItems(requestId);
   const [selectedItems, setSelectedItems] = useState<Map<string, number>>(new Map());
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
   // Handle no requestId
-  if (!requestId) return <div>No request selected</div>;
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading request</div>;
-  if (!request) return <div>Request not found</div>;
+  useEffect(() => {
+    if (!requestId) {
+      navigate("/admin/view-stocks", { replace: true });
+    }
+  }, [requestId, navigate]);
+
 
   // Pagination
-  const totalItems = request.items?.length || 0;
+  const totalItems = request?.items?.length || 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   const paginatedItems = useMemo<RestockRequestItem[]>(() => {
-    return request.items?.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE) || [];
-  }, [request.items, page]);
+    return request?.items?.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE) || [];
+  }, [request?.items, page]);
+
 
   /** ---------------- Select / Unselect Item ---------------- */
   const handleSelectProduct = (item: RestockRequestItem) => {
@@ -69,10 +73,14 @@ export default function ViewStockDetail() {
     setSelectedItems(new Map());
     refetch();
   };
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading request</div>;
+  if (!request) return <div>Request not found</div>;
+  if (!requestId) return null;
 
   return (
     <div>
-      <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight">
+      <h2 className="scroll-m-20 py-4 text-3xl font-semibold tracking-tight">
         Branch: {request.branch?.name || "N/A"}
       </h2>
 

@@ -1,3 +1,4 @@
+// types/sales.ts
 export interface SaleEntity {
   _id?: string;
   branchId: string;
@@ -14,12 +15,12 @@ export interface SaleEntity {
     appliedDiscountAmount?: number;
     freeUnits?: number;
   }[];
-
   status: "PENDING" | "COMPLETED" | "REFUNDED";
   paymentMode?: "CASH" | "CARD" | "UPI";
   createdAt?: Date;
   updatedAt?: Date;
 }
+
 export interface PaginatedSales {
   data: SaleEntity[];
   total: number;

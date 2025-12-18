@@ -29,7 +29,7 @@ export function useAdminStockRequests() {
 }
 
 // Hook to fetch a single stock request by ID
-export function useStockRequestItems(requestId: string) {
+export function useStockRequestItems(requestId?: string) {
   return useQuery<RestockRequest, Error>({
     queryKey: ["admin-stock-request", requestId],
     enabled: !!requestId,

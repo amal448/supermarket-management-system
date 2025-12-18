@@ -1,16 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SalesService } from "@/services/sales.service";
-// import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useState } from "react";
 
 export function useSales(saleId?: string) {
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [search, setSearch] = useState("");
-
   const { user } = useAuth();
+
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
   const isDashboardAllowed =
     user?.role === "admin" || user?.role === "manager";
@@ -18,18 +16,15 @@ export function useSales(saleId?: string) {
   // ✅ Run ONLY for admin / manager
   const getSummarySales = useQuery({
     queryKey: ["sales-summary"],
-    queryFn: () => SalesService.getSalesSummary({
-        page,
-        limit,
-        search,
-    }),
+    queryFn: () => SalesService.getSalesSummary(),
     enabled: isDashboardAllowed,   // 🔥 THIS FIX
     refetchInterval: 1000 * 60 * 5,
   });
 
   const salesQuery = useQuery({
-    queryKey: ["sales"],
-    queryFn: () => SalesService.getMySales(),
+    queryKey: ["sales",page, search],
+    queryFn: () => SalesService.getMySales(page, 10, search),
+    placeholderData: keepPreviousData,
     enabled: !saleId,
   });
 
@@ -53,9 +48,9 @@ export function useSales(saleId?: string) {
     salesQueryDetails,
     PaymentMutation,
     queryClient,
-     page,
+    page,
     setPage,
     search,
-    setSearch,
+    setSearch
   };
 }
