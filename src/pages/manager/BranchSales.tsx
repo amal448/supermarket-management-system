@@ -1,16 +1,15 @@
 import { BranchSalesColumns } from '@/components/tanstacktable/branchSalesColumns';
 import ViewItems from '@/components/tanstacktable/page';
 import { useSales } from '@/hooks/useSales';
-import type { SaleEntity } from '@/lib/types/sales';
+import type { SaleEntity, PaginatedSales } from '@/lib/types/sales';
 import { useNavigate } from 'react-router-dom';
+import Pagination from '@/components/ui/Pagination';
 
 const BranchSales = () => {
     const navigate = useNavigate();
+    const { salesQuery, page, setPage } = useSales();
 
-    const { salesQuery } = useSales();
-    console.log("salesQuery", salesQuery);
-
-    if (salesQuery.isLoading) return <p>Loading products...</p>;
+    if (salesQuery.isLoading) return <p>Loading sales...</p>;
     if (salesQuery.isError) {
         const errMsg =
             (salesQuery.error as any)?.response?.data?.message ||
@@ -19,22 +18,29 @@ const BranchSales = () => {
 
         return <p className="text-red-500">{errMsg}</p>;
     }
-    const items: SaleEntity[] = Array.isArray(salesQuery.data)
-        ? salesQuery.data
-        : salesQuery.data
-            ? [salesQuery.data]   // wrap single sale
-            : [];
+
+    const paginatedSales: PaginatedSales | undefined = salesQuery.data;
+    const items: SaleEntity[] = paginatedSales?.data || [];
+    const totalPages: number = paginatedSales?.totalPages || 1;
+
+    if (items.length === 0) return <p>No sales found.</p>;
 
     return (
         <div className="h-full">
             <div className="flex items-center justify-between mb-4">
                 <div className='flex flex-col gap-2'>
                     <h1 className="text-3xl font-bold text-foreground">Latest Transactions</h1>
-                    <p className="text-muted-foreground">For More Clarification Connect your Branch  Manager</p>
+                    <p className="text-muted-foreground">For more clarification, connect your Branch Manager</p>
                 </div>
             </div>
 
             <ViewItems items={items} columns={BranchSalesColumns(navigate)} />
+
+            <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+            />
         </div>
     );
 };
