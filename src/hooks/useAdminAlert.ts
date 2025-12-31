@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { api } from "@/services/api";
 
 export const useSendMessage = () => {
   
@@ -9,8 +10,9 @@ export const useSendMessage = () => {
       senderId:string |null 
       message: string;
     }) => {
-      const res = await axios.post(
-        "http://localhost:5000/api/socket/chat/send",
+      const res = await api.post(
+        // "http://localhost:5000/api/socket/chat/send",
+        "/api/socket/chat/send",
         payload,
         { withCredentials: true }
       );

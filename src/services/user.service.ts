@@ -3,7 +3,8 @@
 import type { User } from "@/lib/types/user";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
+const API_URL = "/api/user";
 export type Manager = {
   id: string;
   username: string;
@@ -16,14 +17,14 @@ export type Manager = {
 export const UserService = {
   // Get all MANAGERS
   getManagers: async (): Promise<User[]> => {
-    const res = await axios.get(`${API_URL}/user/get-all-manager`, {
+    const res = await axios.get(`${API_URL}/get-all-manager`, {
       withCredentials: true,
     });
     return res.data;
   },
   // OPTIONAL: get all users (if needed later)
   getAll: async (): Promise<User[]> => {
-    const res = await axios.get(`${API_URL}/user/getalluser`, {
+    const res = await axios.get(`${API_URL}/getalluser`, {
       withCredentials: true,
     });
 
@@ -40,7 +41,7 @@ export const UserService = {
     return res.data;
   },
   editUser: async (data: any,): Promise<Manager[]> => {
-    const endpoint = '/user/update-user'
+    const endpoint = '/update-user'
 
 
     const res = await axios.post(`${API_URL}${endpoint}`, data, {
@@ -50,7 +51,7 @@ export const UserService = {
     return res.data;
   },
   deleteUser: async (id: any,): Promise<User[]> => {
-    const endpoint = '/user/delete-user'
+    const endpoint = '/delete-user'
 
 
     const res = await axios.post(`${API_URL}${endpoint}`, { id }, {

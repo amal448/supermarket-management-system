@@ -7,8 +7,10 @@ type GetBranchStockParams = {
   limit: number;
   search: string;
 };
-const API_URL = "http://localhost:5003/api/inventory"
-const STOCK_URL = "http://localhost:5003/api/stock"
+const API_URL = "/api/inventory"
+const STOCK_URL = "/api/stock"
+// const API_URL = "http://localhost:5003/api/inventory"
+// const STOCK_URL = "http://localhost:5003/api/stock"
 
 export const BranchInventoryService = {
   // GET ALL products

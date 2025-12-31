@@ -7,7 +7,8 @@ export const useChatHistory = (userId?: string, otherId?: string) => {
     enabled: !!userId && !!otherId,
     queryFn: async () => {
       const res = await axios.get(
-        `http://localhost:5000/api/socket/history/${userId}/${otherId}`,
+        // `http://localhost:5000/api/socket/history/${userId}/${otherId}`,
+        `/api/socket/history/${userId}/${otherId}`,
         { withCredentials: true }
       );
       console.log("usechat",res.data);
