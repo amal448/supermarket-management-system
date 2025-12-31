@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthService } from "@/services/auth.service";
 import type { User } from "@/lib/types/user";
-import axios from "axios";
-
+// import axios from "axios";
+import { api } from "@/services/api";
 type AuthContextType = {
   user: User | null;
   accessToken: string | null;
@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /** Axios interceptor to attach access token */
   useEffect(() => {
 
-    const requestInterceptor = axios.interceptors.request.use((config) => {
+    const requestInterceptor = api.interceptors.request.use((config) => {
       if (
         accessToken &&
         config.headers &&
