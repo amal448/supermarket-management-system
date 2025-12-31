@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from "axios";
+import  { type AxiosResponse } from "axios";
 import type { RestockRequest, RestockRequestItem } from "@/lib/types/restock";
 import { api } from "./api";
 
