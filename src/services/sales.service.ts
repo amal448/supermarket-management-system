@@ -1,7 +1,8 @@
 import type { CreatePaymentDTO, PaymentResponse } from "@/lib/types/payment";
 import type { Period } from "@/lib/types/saleanalyse";
 import type { PaginatedSales, SaleEntity } from "@/lib/types/sales";
-import { api } from "./api";
+import axios from "axios";
+// import { api } from "./api";
 // const API_URL = "http://localhost:5004/api/sales";
 
 const API_URL = "/api/sales";
@@ -10,7 +11,7 @@ const API_URL = "/api/sales";
 export const SalesService = {
     //Manager DashBoard
     async getSalesSummary() {
-        const res = await api.get(`${API_URL}/sales-summary`, { withCredentials: true });
+        const res = await axios.get(`${API_URL}/sales-summary`, { withCredentials: true });
         return res.data; // [{ date, cash, card }]
     },
     async getSalesAnalysis(
@@ -19,7 +20,7 @@ export const SalesService = {
         endDate?: string,
         period?: Period
     ) {
-        const res = await api.get(`${API_URL}/analytics`, {
+        const res = await axios.get(`${API_URL}/analytics`, {
             params: { branchId, startDate, endDate, period },
             withCredentials: true,
         });
@@ -29,13 +30,13 @@ export const SalesService = {
 
     // GET ALL products
     getMySales: async (page = 1, limit = 10, search = ""): Promise<PaginatedSales> => {
-        const res = await api.get(`${API_URL}?page=${page}&limit=${limit}&search=${search}`, {
+        const res = await axios.get(`${API_URL}?page=${page}&limit=${limit}&search=${search}`, {
             withCredentials: true,
         });
         return res.data;
     },
     getMoreSalesDetails: async (id: string): Promise<SaleEntity> => {
-        const res = await api.get(`${API_URL}/${id}`, {
+        const res = await axios.get(`${API_URL}/${id}`, {
             withCredentials: true,
         });
         return res.data;
@@ -43,7 +44,7 @@ export const SalesService = {
 
     // CREATE new product
     create: async (data: CreatePaymentDTO): Promise<PaymentResponse> => {
-        const res = await api.post<PaymentResponse>(`${API_URL}/payment`, data, {
+        const res = await axios.post<PaymentResponse>(`${API_URL}/payment`, data, {
             withCredentials: true,
         });
         return res.data;

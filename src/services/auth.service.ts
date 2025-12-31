@@ -1,6 +1,7 @@
 // src/services/auth.service.ts
-import { api } from "./api";
+// import { api } from "./api";
 import type { User } from "@/lib/types/user";
+import axios from "axios";
 
 export type LoginData = { email: string; password: string };
 export type LoginResponse = { user: User; accessToken: string };
@@ -10,18 +11,18 @@ const API_URL = "/api/auth";
 
 export const AuthService = {
   login: async (data: LoginData): Promise<LoginResponse> => {
-    const res = await api.post(`${API_URL}/login`, data, {
+    const res = await axios.post(`${API_URL}/login`, data, {
       withCredentials: true, // sets refresh token cookie
     });
     return res.data;
   },
 
   logout: async () => {
-    await api.post(`${API_URL}/logout`, {}, { withCredentials: true });
+    await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
   },
 
   refreshToken: async (): Promise<{ accessToken: string; user: User }> => {
-    const res = await api.get(`${API_URL}/refresh`, { withCredentials: true });
+    const res = await axios.get(`${API_URL}/refresh`, { withCredentials: true });
     return res.data;
   },
 };
