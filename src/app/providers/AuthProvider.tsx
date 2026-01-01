@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+// context/AuthContext.tsx
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { AuthService } from "@/services/auth.service";
 import type { User } from "@/lib/types/user";
-// import axios from "axios";
 import { api } from "@/services/api";
-// import axios from "axios";
 
 type AuthContextType = {
   user: User | null;
@@ -12,7 +11,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
   loading: boolean;
-  initialized: boolean
+  initialized: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,42 +21,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const refreshingRef = useRef(false); // avoids double refresh
 
-  /** Axios interceptor to attach access token */
+  /** Axios interceptor */
   useEffect(() => {
-
     const requestInterceptor = api.interceptors.request.use((config) => {
-      if (
-        accessToken &&
-        config.headers &&
-        !config.url?.includes("/auth/login") &&
-        !config.url?.includes("/auth/refresh")
-      ) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+      // Always attach latest token
+      if (config.headers && !config.url?.includes("/auth/login") && !config.url?.includes("/auth/refresh")) {
+        if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;
     });
-
 
     const responseInterceptor = api.interceptors.response.use(
       (res) => res,
       async (error) => {
         const originalRequest = error.config;
+
         if (
           error.response?.status === 401 &&
           !originalRequest._retry &&
-          !originalRequest.url?.includes("/refresh")
+          !originalRequest.url?.includes("/auth/refresh")
         ) {
           originalRequest._retry = true;
+
           try {
             await refreshAccessToken();
-            return api(originalRequest);
+            return api(originalRequest); // retry request after refresh
           } catch {
             await logout();
             return Promise.reject(error);
           }
         }
+
         return Promise.reject(error);
       }
     );
@@ -68,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [accessToken]);
 
-  /** Initialization: refresh token if exists */
+  /** Initialization */
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -78,24 +74,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccessToken(null);
       } finally {
         setLoading(false);
-        setInitialized(true); // now the app knows auth check is done
+        setInitialized(true);
       }
     };
     initializeAuth();
   }, []);
 
-  useEffect(() => {
-  console.log("Current accessToken:", accessToken);
-}, [accessToken]);
-
-
   /** Login */
-  const login = async (email: string, password: string): Promise<User> => {
+  const login = async (email: string, password: string) => {
     setLoading(true);
     try {
       const res = await AuthService.login({ email, password });
-      console.log("auth login", res);
-
       setUser(res.user);
       setAccessToken(res.accessToken);
       return res.user;
@@ -111,22 +100,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccessToken(null);
   };
 
-  /** Refresh access token */
+  /** Refresh token */
   const refreshAccessToken = async () => {
-    if (refreshing) return;
-    setRefreshing(true);
-    try {
-      const res = await AuthService.refreshToken(); // cookie-based refresh
-      setAccessToken(res.accessToken);
-      console.log("auth refreshAccessToken", res);
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
 
+    try {
+      const res = await AuthService.refreshToken();
+      setAccessToken(res.accessToken);
       setUser(res.user);
-    } catch (err) {
+    } catch {
       setUser(null);
       setAccessToken(null);
       await logout();
     } finally {
-      setRefreshing(false);
+      refreshingRef.current = false;
     }
   };
 
