@@ -15,7 +15,7 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-console.log("✅ Updated auth.service.ts loaded");
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshingRef = useRef(false); // avoids double refresh
 
   /** Axios interceptor */
+  console.log("✅ Updated auth.service.ts loaded");
   useEffect(() => {
     const requestInterceptor = api.interceptors.request.use((config) => {
       // Always attach latest token
