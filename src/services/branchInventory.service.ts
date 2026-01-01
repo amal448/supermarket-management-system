@@ -1,8 +1,8 @@
 
 import type {  Product } from "@/lib/types/product";
 import type { RestockRequestPayload } from "@/lib/types/restock";
-// import { api } from "./api";
-import axios from "axios";
+import { api } from "./api";
+// import axios from "axios";
 
 type GetBranchStockParams = {
   page: number;
@@ -23,7 +23,7 @@ getBranchStock: async ({
   limit,
   search,
 }: GetBranchStockParams) => {
-  const res = await axios.get(
+  const res = await api.get(
     `${API_URL}/branch/stock?page=${page}&limit=${limit}&search=${search}`,
     { withCredentials: true }
   );
@@ -34,7 +34,7 @@ getBranchStock: async ({
 
   // CREATE new product
   create: async (data: RestockRequestPayload ): Promise<Product> => {
-    const res = await axios.post(`${STOCK_URL}/`, data, {
+    const res = await api.post(`${STOCK_URL}/`, data, {
       withCredentials: true,
     });
     return res.data;

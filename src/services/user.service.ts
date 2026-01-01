@@ -2,8 +2,8 @@
 
 import type { User } from "@/lib/types/user";
 // import axios from "axios";
-// import { api } from "./api";
-import axios from "axios";
+import { api } from "./api";
+
 // const API_URL = "http://localhost:5000/api";
 const API_URL = "/api/user";
 export type Manager = {
@@ -18,14 +18,14 @@ export type Manager = {
 export const UserService = {
   // Get all MANAGERS
   getManagers: async (): Promise<User[]> => {
-    const res = await axios.get(`${API_URL}/get-all-manager`, {
+    const res = await api.get(`${API_URL}/get-all-manager`, {
       withCredentials: true,
     });
     return res.data;
   },
   // OPTIONAL: get all users (if needed later)
   getAll: async (): Promise<User[]> => {
-    const res = await axios.get(`${API_URL}/getalluser`, {
+    const res = await api.get(`${API_URL}/getalluser`, {
       withCredentials: true,
     });
 
@@ -35,7 +35,7 @@ export const UserService = {
     const endpoint =
       role === "admin" ? "/auth/register" : "/user/create-user";
 
-    const res = await axios.post(`${API_URL}${endpoint}`, data, {
+    const res = await api.post(`${API_URL}${endpoint}`, data, {
       withCredentials: true,
     });
 
@@ -45,7 +45,7 @@ export const UserService = {
     const endpoint = '/update-user'
 
 
-    const res = await axios.post(`${API_URL}${endpoint}`, data, {
+    const res = await api.post(`${API_URL}${endpoint}`, data, {
       withCredentials: true,
     });
 
@@ -55,7 +55,7 @@ export const UserService = {
     const endpoint = '/delete-user'
 
 
-    const res = await axios.post(`${API_URL}${endpoint}`, { id }, {
+    const res = await api.post(`${API_URL}${endpoint}`, { id }, {
       withCredentials: true,
     });
 
