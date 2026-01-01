@@ -5,7 +5,7 @@ import type { User } from "@/lib/types/user";
 export type LoginData = { email: string; password: string };
 export type LoginResponse = { user: User; accessToken: string };
 
-const API_URL = "/api/auth";
+const API_URL = "auth";
 
 export const AuthService = {
   /** Login with credentials */
