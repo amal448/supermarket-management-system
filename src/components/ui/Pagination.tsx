@@ -1,5 +1,5 @@
-
 interface PaginationProps {
+
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -35,8 +35,7 @@ export default function Pagination({
       >
         Prev
       </button>
-
-      {pages}
+        {pages}
 
       <button
         onClick={() => onPageChange(currentPage + 1)}

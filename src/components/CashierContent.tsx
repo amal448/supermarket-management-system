@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShoppingCart, Minus, Plus, X } from "lucide-react";
@@ -13,6 +13,8 @@ import type { DiscountResponse } from "@/lib/types/discount";
 import { useSales } from "@/hooks/useSales";
 import { useSocket } from "@/hooks/useSocket";
 import { useNavigate } from "react-router-dom";
+import type { ColumnDef } from "@tanstack/react-table";
+import ViewItems from "@/components/tanstacktable/page";
 import Pagination from "./ui/Pagination";
 
 interface CartItem extends BranchProduct {
@@ -132,6 +134,40 @@ export default function CashierContent() {
 
   const total = subtotal; // Add discount later if needed
 
+  const payDisabled = checkDiscountMutation.isPending || cartItems.length === 0;
+  const payClass = `w-full mt-3 bg-blue-500 text-white ${payDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600 cursor-pointer'}`;
+
+  const productTableColumns: ColumnDef<BranchProduct>[] = [
+    { accessorKey: "name", header: "Product" },
+    { accessorKey: "sku", header: "SKU" },
+    { accessorKey: "category", header: "Category" },
+    {
+      accessorKey: "stock",
+      header: "Stock",
+      cell: ({ row }) => {
+        const s = row.original.stock;
+        return <Badge className={s > 0 ? "bg-green-500" : "bg-red-500"}>{s}</Badge>;
+      },
+    },
+    {
+      accessorKey: "sellingPrice",
+      header: "Price",
+      cell: ({ row }) => <Badge className="bg-green-500">₹{row.original.sellingPrice}</Badge>,
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <Button size="sm" variant="default" className="bg-blue-500 text-white hover:bg-blue-600 cursor-pointer" onClick={() => handleAddToCart(product)}>
+            Add
+          </Button>
+        );
+      },
+    },
+  ];
+
   useEffect(() => {
     if (!socket || !socket.connected || !branchId) return;
 
@@ -173,7 +209,13 @@ export default function CashierContent() {
               }}
             />
 
-            <Button onClick={() => setSearch("")} className="w-full sm:w-auto">Clear</Button>
+            <Button
+              variant="default"
+              onClick={() => setSearch("")}
+              className="w-full sm:w-auto bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+            >
+              Clear
+            </Button>
           </div>
 
           <Card className="flex flex-col h-full">
@@ -181,45 +223,23 @@ export default function CashierContent() {
               <CardTitle>Products</CardTitle>
             </CardHeader> */}
 
-            <CardContent>
-              <ScrollArea className="flex-1">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-
-                  {getbranchproductStock.data?.data?.map((product: BranchProduct) => (
-                    <div
-                      key={product._id}
-                      className="p-3 border rounded bg-white flex flex-col justify-between shadow-sm"
-                    >
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {product.sku} • {product.category}
-                        </div>
-                      </div>
-                      <div className="flex w-full justify-between py-4">
-                        <p className="text-green-400 font-bold">Stock Remaining:</p>
-                        <p className="text-red-400">{product.stock} Items</p>
-
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="font-semibold">₹{product.sellingPrice}</div>
-                        <Button size="sm" className="bg-blue-400" onClick={() => handleAddToCart(product)}>
-                          Add
-                        </Button>
-                      </div>
-                    </div>
-
-                  ))}
-
+            <CardContent className="flex-1">
+              <ScrollArea className="h-full">
+                <div className="p-2 bg-white rounded">
+                  <ViewItems items={products} columns={productTableColumns} />
                 </div>
+              </ScrollArea>
+            </CardContent>
+
+            <CardFooter className="mt-auto">
+              <div className="w-full flex justify-end py-2">
                 <Pagination
                   currentPage={page}
                   totalPages={totalPages}
                   onPageChange={(p) => setPage(p)}
                 />
-              </ScrollArea>
-            </CardContent>
+              </div>
+            </CardFooter>
           </Card>
         </div>
 
@@ -228,7 +248,7 @@ export default function CashierContent() {
           <Card className="flex flex-col h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShoppingCart /> Cart <Badge>{cartItems.length}</Badge>
+                <ShoppingCart /> Cart <Badge className="bg-blue-500">{cartItems.length}</Badge>
               </CardTitle>
             </CardHeader>
 
@@ -304,13 +324,17 @@ export default function CashierContent() {
                   </div>
 
                   <Button
-                    className="w-full mt-3 bg-blue-500"
+                    variant="default"
+                    className={payClass}
                     onClick={handleDiscount}
-                    disabled={checkDiscountMutation.isPending}
+                    disabled={payDisabled}
                   >
                     {checkDiscountMutation.isPending ? "Checking..." : "Pay"}
                   </Button>
 
+                  {cartItems.length === 0 && (
+                    <div className="text-xs text-muted-foreground mt-2">Add items to the cart to enable payment</div>
+                  )}
 
                 </div>
               </div>
@@ -319,6 +343,9 @@ export default function CashierContent() {
         </div>
 
       </div>
+
+
+
       <PaymentModal
         open={paymentOpen}
         total={discountResult?.finalAmount ?? total}
