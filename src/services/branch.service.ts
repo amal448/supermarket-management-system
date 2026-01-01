@@ -1,7 +1,7 @@
 // import axios from "axios";
 import { api } from "./api";
 
-const API_URL = "/api/branch";
+const API_URL = "branch";
 // const API_URL = "http://localhost:5003/api/branch";
 export const BranchService = {
     // GET all branches

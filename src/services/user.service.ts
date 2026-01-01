@@ -5,7 +5,7 @@ import type { User } from "@/lib/types/user";
 import { api } from "./api";
 
 // const API_URL = "http://localhost:5000/api";
-const API_URL = "/api/user";
+const API_URL = "user";
 export type Manager = {
   id: string;
   username: string;

@@ -13,7 +13,7 @@ type ApiResponse<T> = {
 };
 
 // const STOCK_URL = "http://localhost:5003/api/stock";
-const STOCK_URL = "/api/stock";
+const STOCK_URL = "stock";
 
 export const StockInventoryService = {
   /** GET ALL stock requests (with pagination) */

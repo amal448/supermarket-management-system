@@ -3,7 +3,7 @@ import { api } from "./api";
 import type{ DiscountEntity } from "@/lib/types/discount";
 // const API_URL = "http://localhost:5004/api/discounts";
 
-const API_URL = "/api/discounts";
+const API_URL = "discounts";
 
 export const DiscountService = {
     // GET all branches

@@ -5,7 +5,7 @@ import type { PaginatedSales, SaleEntity } from "@/lib/types/sales";
 import { api } from "./api";
 // const API_URL = "http://localhost:5004/api/sales";
 
-const API_URL = "/api/sales";
+const API_URL = "sales";
 // sales.service.ts
 
 export const SalesService = {
