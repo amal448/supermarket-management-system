@@ -8,7 +8,7 @@ export const useChatHistory = (userId?: string, otherId?: string) => {
     queryFn: async () => {
       const res = await api.get(
         // `http://localhost:5000/api/socket/history/${userId}/${otherId}`,
-        `/api/socket/history/${userId}/${otherId}`,
+        `socket/history/${userId}/${otherId}`,
         { withCredentials: true }
       );
       console.log("usechat",res.data);
