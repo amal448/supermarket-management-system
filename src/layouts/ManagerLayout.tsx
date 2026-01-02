@@ -12,7 +12,7 @@ export default function ManagerLayout() {
   return (
     <SidebarProvider>
       <ManagerSidebar />
-      <main className="w-full">
+      <main className="w-full overflow-hidden">
         <nav className="w-full bg-gray-100 py-2 px-4 ">
           <div className="flex justify-between items-center">
             <div className="space-x-5">

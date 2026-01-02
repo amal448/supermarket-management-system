@@ -6,7 +6,7 @@ export default function BaseLayout() {
     <div className="h-screen ">
       {/* Sidebar injected by child */}
       <NavBar/>
-      <div className="h-full px-6 md:px-16 mb-10 lg:px-24 py-5 overflow-hidden">
+      <div className="h-full px-6 md:px-16  mb-10 lg:px-24 py-5 overflow-hidden">
       <Outlet />
       </div>
     </div>
