@@ -56,7 +56,7 @@ const ViewStockRequest = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap overflow-hidden gap-3 items-center mb-4 ">
+      <div className="flex flex-wrap overflow-x-scroll gap-3 items-center mb-4 ">
         <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
           All
         </Button>
