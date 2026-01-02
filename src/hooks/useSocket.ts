@@ -9,10 +9,14 @@ export function useSocket() {
 
   useEffect(() => {
     if (!socket) {
-      socket = io("http://localhost:5000", {
+      socket = io("http://18.60.239.13", {
         path: "/socket.io",
         transports: ["websocket"],
       });
+      // socket = io("http://localhost:5000", {
+      //   path: "/socket.io",
+      //   transports: ["websocket"],
+      // });
 
       socket.on("connect", () => {
         console.log("✅ Socket connected:", socket!.id);
