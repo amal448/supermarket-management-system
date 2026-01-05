@@ -9,7 +9,7 @@ export function useSocket() {
 
   useEffect(() => {
     if (!socket) {
-      socket = io("http://18.60.239.13", {
+      socket = io("https://api.smmanagement.store/api/socket", {
         path: "/socket.io",
         transports: ["websocket"],
       });
