@@ -2,7 +2,7 @@ import type { PaginatedProducts, Product } from "@/lib/types/product";
 // import axios from "axios";
 import { api } from "./api";
 // const API_URL = "http://localhost:5003/api/inventory";
-const API_URL = "inventory";
+const API_URL = "/api/inventory";
 
 export const InventoryService = {
   // GET ALL products
