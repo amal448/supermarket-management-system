@@ -55,36 +55,51 @@ const ViewStockRequest = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex  overflow-x-scroll gap-3 items-center mb-4 ">
-        <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
-          All
-        </Button>
-        <Button
-          variant={filter === "approved" ? "default" : "outline"}
-          onClick={() => setFilter("approved")}
-        >
-          Approved
-        </Button>
-        <Button
-          variant={filter === "partially" ? "default" : "outline"}
-          onClick={() => setFilter("partially")}
-        >
-          Partially Approved
-        </Button>
-        <Button
-          variant={filter === "rejected" ? "default" : "outline"}
-          onClick={() => setFilter("rejected")}
-        >
-          Rejected
-        </Button>
-        <Input
-          placeholder="Search by branch or manager..."
-          className="ml-auto w-64"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+{/* Filters */}
+<div className="mb-4 space-y-3">
+
+  {/* Buttons row */}
+  <div className="flex gap-3 overflow-x-auto whitespace-nowrap no-scrollbar">
+    <Button
+      variant={filter === "all" ? "default" : "outline"}
+      onClick={() => setFilter("all")}
+    >
+      All
+    </Button>
+
+    <Button
+      variant={filter === "approved" ? "default" : "outline"}
+      onClick={() => setFilter("approved")}
+    >
+      Approved
+    </Button>
+
+    <Button
+      variant={filter === "partially" ? "default" : "outline"}
+      onClick={() => setFilter("partially")}
+    >
+      Partially Approved
+    </Button>
+
+    <Button
+      variant={filter === "rejected" ? "default" : "outline"}
+      onClick={() => setFilter("rejected")}
+    >
+      Rejected
+    </Button>
+  </div>
+
+  {/* Search */}
+  <div className="flex justify-end">
+    <Input
+      placeholder="Search branch or manager..."
+      className="w-full sm:w-72"
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
+  </div>
+</div>
+
 
       {/* Table */}
       <ViewItems items={filteredData} columns={requestColumns} />
