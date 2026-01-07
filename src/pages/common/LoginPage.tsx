@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "admin@gmail.com", password: "admin" },
   });
 
 // login page role-aware navigation
